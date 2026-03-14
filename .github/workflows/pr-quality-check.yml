@@ -46,7 +46,7 @@ jobs:
         if: matrix.check.name == 'Types'
         run: npm run prisma:generate
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/db
+          DATABASE_URL: mongodb://localhost:27017/restaurant-service
 
       - name: Run ${{ matrix.check.name }} check
         run: ${{ matrix.check.command }}

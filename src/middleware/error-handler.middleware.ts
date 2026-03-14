@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { AppError } from '../utils/errors';
 import { logger } from '../utils/logger';
 import { environment } from '../config/environment';
-import { Prisma } from '../../generated/prisma/client.js';
+import { Prisma } from '@prisma/client';
 import { StatusCodes } from 'http-status-codes';
 import { EnvironmentEnum, PRISMA_CODE } from '../utils/constants';
 import { CommonResponseDTO } from '../dtos/common.dto';

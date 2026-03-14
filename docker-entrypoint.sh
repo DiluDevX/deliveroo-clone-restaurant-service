@@ -10,5 +10,8 @@ echo "────────────────────────�
 # ── Guard: required env vars ─────────────────────────────────────────────────
 : "${DATABASE_URL:?❌  DATABASE_URL is not set. Aborting.}"
 
+echo "▶ Generating Prisma client..."
+npx prisma generate
+
 echo "▶ Starting application..."
 exec "$@"

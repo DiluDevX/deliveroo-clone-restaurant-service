@@ -1,5 +1,4 @@
-import { PrismaClient } from '../../generated/prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from '@prisma/client';
 import { logger } from '../utils/logger';
 import { environment } from './environment';
 import { EnvironmentEnum } from '../utils/constants';
@@ -9,9 +8,7 @@ declare global {
   var __prisma: PrismaClient | undefined;
 }
 
-const adapter = new PrismaPg({ connectionString: environment.databaseUrl });
-
-export const prisma = globalThis.__prisma || new PrismaClient({ adapter });
+export const prisma = globalThis.__prisma || new PrismaClient();
 
 if (environment.env !== EnvironmentEnum.Production) {
   globalThis.__prisma = prisma;
@@ -39,7 +36,7 @@ export async function disconnectDatabase(): Promise<void> {
 
 export async function checkDatabaseConnection(): Promise<'connected' | 'disconnected'> {
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    await prisma.$runCommandRaw({ ping: 1 });
     return 'connected';
   } catch {
     return 'disconnected';

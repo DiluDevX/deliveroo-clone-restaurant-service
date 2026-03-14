@@ -1,4 +1,4 @@
-FROM node:24-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -9,14 +9,14 @@ COPY . .
 RUN npm run prisma:generate
 RUN npm run build
 
-FROM node:24-alpine AS deps
+FROM node:20-alpine AS deps
 
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev --ignore-scripts
 
-FROM node:24-alpine AS runner
+FROM node:20-alpine AS runner
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser  --system --uid 1001 app
@@ -31,16 +31,17 @@ ENV ENV=$ENV \
 
 COPY --from=deps    --chown=app:nodejs /app/node_modules    ./node_modules
 COPY --from=builder --chown=app:nodejs /app/prisma          ./prisma
-COPY --from=builder --chown=app:nodejs /app/generated       ./generated
 COPY --from=builder --chown=app:nodejs /app/dist            ./dist
 COPY --from=builder --chown=app:nodejs /app/package.json    ./package.json
-COPY --from=builder --chown=app:nodejs /app/prisma.config.ts    ./prisma.config.ts
 
 COPY --chown=app:nodejs docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
 
 USER app
-EXPOSE 3000
+EXPOSE 3002
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://localhost:3002/health || exit 1
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["node", "dist/src/index.js"]

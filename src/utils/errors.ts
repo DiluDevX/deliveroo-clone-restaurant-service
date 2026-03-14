@@ -62,3 +62,21 @@ export class TooManyRequestsError extends AppError {
     super(message, StatusCodes.TOO_MANY_REQUESTS, 'TOO_MANY_REQUESTS');
   }
 }
+
+export class RestaurantNotFoundError extends AppError {
+  constructor(message = 'Restaurant not found') {
+    super(message, StatusCodes.NOT_FOUND, 'RESTAURANT_NOT_FOUND');
+  }
+}
+
+export class CategoryNotFoundError extends AppError {
+  constructor(message = 'Category not found') {
+    super(message, StatusCodes.NOT_FOUND, 'CATEGORY_NOT_FOUND');
+  }
+}
+
+export class DishNotFoundError extends AppError {
+  constructor(message = 'Dish not found') {
+    super(message, StatusCodes.NOT_FOUND, 'DISH_NOT_FOUND');
+  }
+}
