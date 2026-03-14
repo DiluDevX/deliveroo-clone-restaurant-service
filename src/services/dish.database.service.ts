@@ -7,8 +7,8 @@ export async function findManyByRestaurant(
   filters: { categoryId?: string; isVegetarian?: boolean; isAvailable?: boolean }
 ): Promise<Dish[]> {
   const where: Prisma.DishWhereInput = {
-    restaurantId,
     deletedAt: null,
+    ...(restaurantId ? { restaurantId } : {}),
     ...(filters.categoryId !== undefined ? { categoryId: filters.categoryId } : {}),
     ...(filters.isVegetarian !== undefined ? { isVegetarian: filters.isVegetarian } : {}),
     ...(filters.isAvailable !== undefined ? { isAvailable: filters.isAvailable } : {}),
@@ -20,9 +20,13 @@ export async function findManyByRestaurant(
   });
 }
 
-export async function findOneById(id: string, restaurantId: string): Promise<Dish | null> {
+export async function findOneById(id: string, restaurantId?: string): Promise<Dish | null> {
   return prisma.dish.findFirst({
-    where: { id, restaurantId, deletedAt: null },
+    where: {
+      id,
+      ...(restaurantId ? { restaurantId } : {}),
+      deletedAt: null,
+    },
   });
 }
 

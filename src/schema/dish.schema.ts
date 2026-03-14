@@ -31,7 +31,8 @@ export const updateDishSchema = z
   });
 
 export const listDishesQuerySchema = z.object({
-  categoryId: z.string().optional(),
+  category: z.string().optional(),
+  restaurant: z.string().optional(),
   isVegetarian: z
     .string()
     .optional()
@@ -43,6 +44,5 @@ export const listDishesQuerySchema = z.object({
 });
 
 export const dishIdParamsSchema = z.object({
-  restaurantId: z.string().min(1, 'restaurantId is required'),
   dishId: z.string().min(1, 'dishId is required'),
 });

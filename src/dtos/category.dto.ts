@@ -3,11 +3,13 @@ import {
   createCategorySchema,
   updateCategorySchema,
   categoryIdParamsSchema,
+  categoryQuerySchema,
 } from '../schema/category.schema';
 
 export type CreateCategoryDTO = z.infer<typeof createCategorySchema>;
 export type UpdateCategoryDTO = z.infer<typeof updateCategorySchema>;
 export type CategoryIdParamsDTO = z.infer<typeof categoryIdParamsSchema>;
+export type CategoryQueryDTO = z.infer<typeof categoryQuerySchema>;
 
 export interface CategoryResponseDTO {
   id: string;

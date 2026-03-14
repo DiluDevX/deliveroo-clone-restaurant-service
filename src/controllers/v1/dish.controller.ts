@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import * as dishService from '../../services/dish.database.service';
+import * as categoryService from '../../services/category.database.service';
 import * as restaurantService from '../../services/restaurant.database.service';
 import { logger } from '../../utils/logger';
 import { CommonResponseDTO } from '../../dtos/common.dto';
@@ -12,26 +13,33 @@ import {
   DishResponseDTO,
 } from '../../dtos/dish.dto';
 import { ForbiddenError, DishNotFoundError, RestaurantNotFoundError } from '../../utils/errors';
-import { RestaurantIdParamsDTO } from '../../dtos/restaurant.dto';
 import { DishTag } from '@prisma/client';
 
 export const listDishes = async (
-  req: Request<RestaurantIdParamsDTO>,
+  req: Request,
   res: Response<CommonResponseDTO<DishResponseDTO[]>>,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { restaurantId } = req.params;
-    const query = req.query as unknown as ListDishesQueryDTO;
-    const { categoryId, isVegetarian, isAvailable } = query;
+    const { category, restaurant, isVegetarian, isAvailable } = req.query as ListDishesQueryDTO;
+
+    let restaurantId = restaurant;
+    if (restaurantId && category) {
+      const cat = await categoryService.findOneById(category, restaurantId);
+      if (cat) {
+        restaurantId = cat.restaurantId;
+      }
+    } else {
+      throw new ForbiddenError('Restaurant ID is required when filtering by category');
+    }
 
     const dishes = await dishService.findManyByRestaurant(restaurantId, {
-      categoryId,
+      categoryId: category,
       isVegetarian,
       isAvailable,
     });
 
-    logger.info({ restaurantId, count: dishes.length }, 'dishes listed');
+    logger.info({ restaurantId, category, count: dishes.length }, 'dishes listed');
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -50,15 +58,15 @@ export const getDish = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { restaurantId, dishId } = req.params;
+    const { dishId } = req.params;
 
-    const dish = await dishService.findOneById(dishId, restaurantId);
+    const dish = await dishService.findOneById(dishId);
 
     if (!dish) {
       throw new DishNotFoundError(`Dish with id ${dishId} not found`);
     }
 
-    logger.info({ id: dishId, restaurantId }, 'dish fetched');
+    logger.info({ id: dishId }, 'dish fetched');
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -72,17 +80,24 @@ export const getDish = async (
 };
 
 export const createDish = async (
-  req: Request<RestaurantIdParamsDTO, CommonResponseDTO<DishResponseDTO>, CreateDishDTO>,
+  req: Request<unknown, CommonResponseDTO<DishResponseDTO>, CreateDishDTO>,
   res: Response<CommonResponseDTO<DishResponseDTO>>,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { restaurantId } = req.params;
+    const { categoryId } = req.body;
     const actor = req.actor;
 
     if (!actor || (actor.type !== 'ADMIN' && actor.type !== 'RESTAURANT')) {
       throw new ForbiddenError('Only ADMIN or RESTAURANT actors can create dishes');
     }
+
+    const category = await categoryService.findOneById(categoryId, '');
+    if (!category) {
+      throw new RestaurantNotFoundError(`Category with id ${categoryId} not found`);
+    }
+
+    const restaurantId = category.restaurantId;
 
     await restaurantService.assertRestaurantOwnership(restaurantId, actor);
 
@@ -123,14 +138,19 @@ export const updateDish = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { restaurantId, dishId } = req.params;
+    const { dishId } = req.params;
     const actor = req.actor;
 
     if (!actor || (actor.type !== 'ADMIN' && actor.type !== 'RESTAURANT')) {
       throw new ForbiddenError('Only ADMIN or RESTAURANT actors can update dishes');
     }
 
-    await restaurantService.assertRestaurantOwnership(restaurantId, actor);
+    const dish = await dishService.findOneById(dishId);
+    if (!dish) {
+      throw new DishNotFoundError(`Dish with id ${dishId} not found`);
+    }
+
+    await restaurantService.assertRestaurantOwnership(dish.restaurantId, actor);
 
     const updateData: {
       categoryId?: string;
@@ -156,14 +176,14 @@ export const updateDish = async (
     if (req.body.tags !== undefined) updateData.tags = req.body.tags as DishTag[];
     if (req.body.sortOrder !== undefined) updateData.sortOrder = req.body.sortOrder;
 
-    const dish = await dishService.update(dishId, restaurantId, updateData);
+    const updated = await dishService.update(dishId, dish.restaurantId, updateData);
 
-    logger.info({ id: dishId, restaurantId }, 'dish updated');
+    logger.info({ id: dishId }, 'dish updated');
 
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Dish updated successfully',
-      data: dish as DishResponseDTO,
+      data: updated as DishResponseDTO,
     });
   } catch (error) {
     logger.error(error, 'update dish error');
@@ -177,18 +197,23 @@ export const deleteDish = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { restaurantId, dishId } = req.params;
+    const { dishId } = req.params;
     const actor = req.actor;
 
     if (!actor || (actor.type !== 'ADMIN' && actor.type !== 'RESTAURANT')) {
       throw new ForbiddenError('Only ADMIN or RESTAURANT actors can delete dishes');
     }
 
-    await restaurantService.assertRestaurantOwnership(restaurantId, actor);
+    const dish = await dishService.findOneById(dishId);
+    if (!dish) {
+      throw new DishNotFoundError(`Dish with id ${dishId} not found`);
+    }
 
-    await dishService.softDelete(dishId, restaurantId);
+    await restaurantService.assertRestaurantOwnership(dish.restaurantId, actor);
 
-    logger.info({ id: dishId, restaurantId }, 'dish deleted');
+    await dishService.softDelete(dishId, dish.restaurantId);
+
+    logger.info({ id: dishId }, 'dish deleted');
 
     res.status(StatusCodes.OK).json({
       success: true,

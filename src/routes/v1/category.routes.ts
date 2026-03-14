@@ -5,24 +5,19 @@ import {
   updateCategory,
   deleteCategory,
 } from '../../controllers/v1/category.controller';
-import { validateBody, validateParams } from '../../middleware/validate.middleware';
+import { validateBody, validateParams, validateQuery } from '../../middleware/validate.middleware';
 import {
   createCategorySchema,
   updateCategorySchema,
   categoryIdParamsSchema,
+  categoryQuerySchema,
 } from '../../schema/category.schema';
-import { restaurantIdParamsSchema } from '../../schema/restaurant.schema';
 
-const router = Router({ mergeParams: true });
+const router = Router();
 
-router.get('/', validateParams(restaurantIdParamsSchema), listCategories);
+router.get('/', validateQuery(categoryQuerySchema), listCategories);
 
-router.post(
-  '/',
-  validateParams(restaurantIdParamsSchema),
-  validateBody(createCategorySchema),
-  createCategory
-);
+router.post('/', validateBody(createCategorySchema), createCategory);
 
 router.patch(
   '/:categoryId',

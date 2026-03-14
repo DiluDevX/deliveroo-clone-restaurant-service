@@ -9,21 +9,21 @@ import {
   UpdateCategoryDTO,
   CategoryIdParamsDTO,
   CategoryResponseDTO,
+  CategoryQueryDTO,
 } from '../../dtos/category.dto';
 import { ForbiddenError, RestaurantNotFoundError } from '../../utils/errors';
-import { RestaurantIdParamsDTO } from '../../dtos/restaurant.dto';
 
 export const listCategories = async (
-  req: Request<RestaurantIdParamsDTO>,
+  req: Request,
   res: Response<CommonResponseDTO<CategoryResponseDTO[]>>,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { restaurantId } = req.params;
+    const { restaurant } = req.query as CategoryQueryDTO;
 
-    const categories = await categoryService.findManyByRestaurant(restaurantId);
+    const categories = await categoryService.findManyByRestaurant(restaurant);
 
-    logger.info({ restaurantId, count: categories.length }, 'categories listed');
+    logger.info({ restaurantId: restaurant, count: categories.length }, 'categories listed');
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -37,12 +37,12 @@ export const listCategories = async (
 };
 
 export const createCategory = async (
-  req: Request<RestaurantIdParamsDTO, CommonResponseDTO<CategoryResponseDTO>, CreateCategoryDTO>,
+  req: Request<unknown, CommonResponseDTO<CategoryResponseDTO>, CreateCategoryDTO>,
   res: Response<CommonResponseDTO<CategoryResponseDTO>>,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { restaurantId } = req.params;
+    const { restaurant: restaurantId } = req.body;
     const actor = req.actor;
 
     if (!actor || (actor.type !== 'ADMIN' && actor.type !== 'RESTAURANT')) {
@@ -80,23 +80,28 @@ export const updateCategory = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { restaurantId, categoryId } = req.params;
+    const { categoryId } = req.params;
     const actor = req.actor;
 
     if (!actor || (actor.type !== 'ADMIN' && actor.type !== 'RESTAURANT')) {
       throw new ForbiddenError('Only ADMIN or RESTAURANT actors can update categories');
     }
 
-    await restaurantService.assertRestaurantOwnership(restaurantId, actor);
+    const category = await categoryService.findOneById(categoryId, '');
+    if (!category) {
+      throw new RestaurantNotFoundError(`Category with id ${categoryId} not found`);
+    }
 
-    const category = await categoryService.update(categoryId, restaurantId, req.body);
+    await restaurantService.assertRestaurantOwnership(category.restaurantId, actor);
 
-    logger.info({ id: categoryId, restaurantId }, 'category updated');
+    const updated = await categoryService.update(categoryId, category.restaurantId, req.body);
+
+    logger.info({ id: categoryId }, 'category updated');
 
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Category updated successfully',
-      data: category,
+      data: updated,
     });
   } catch (error) {
     logger.error(error, 'update category error');
@@ -110,18 +115,23 @@ export const deleteCategory = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { restaurantId, categoryId } = req.params;
+    const { categoryId } = req.params;
     const actor = req.actor;
 
     if (!actor || (actor.type !== 'ADMIN' && actor.type !== 'RESTAURANT')) {
       throw new ForbiddenError('Only ADMIN or RESTAURANT actors can delete categories');
     }
 
-    await restaurantService.assertRestaurantOwnership(restaurantId, actor);
+    const category = await categoryService.findOneById(categoryId, '');
+    if (!category) {
+      throw new RestaurantNotFoundError(`Category with id ${categoryId} not found`);
+    }
 
-    await categoryService.softDelete(categoryId, restaurantId);
+    await restaurantService.assertRestaurantOwnership(category.restaurantId, actor);
 
-    logger.info({ id: categoryId, restaurantId }, 'category deleted');
+    await categoryService.softDelete(categoryId, category.restaurantId);
+
+    logger.info({ id: categoryId }, 'category deleted');
 
     res.status(StatusCodes.OK).json({
       success: true,

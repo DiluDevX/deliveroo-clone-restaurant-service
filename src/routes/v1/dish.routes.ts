@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import {
-  listDishes,
   getDish,
   createDish,
   updateDish,
   deleteDish,
+  listDishes,
 } from '../../controllers/v1/dish.controller';
 import { validateBody, validateParams, validateQuery } from '../../middleware/validate.middleware';
 import {
@@ -13,25 +13,14 @@ import {
   listDishesQuerySchema,
   dishIdParamsSchema,
 } from '../../schema/dish.schema';
-import { restaurantIdParamsSchema } from '../../schema/restaurant.schema';
 
-const router = Router({ mergeParams: true });
+const router = Router();
 
-router.get(
-  '/',
-  validateParams(restaurantIdParamsSchema),
-  validateQuery(listDishesQuerySchema),
-  listDishes
-);
+router.get('/', validateQuery(listDishesQuerySchema), listDishes);
 
 router.get('/:dishId', validateParams(dishIdParamsSchema), getDish);
 
-router.post(
-  '/',
-  validateParams(restaurantIdParamsSchema),
-  validateBody(createDishSchema),
-  createDish
-);
+router.post('/', validateBody(createDishSchema), createDish);
 
 router.patch(
   '/:dishId',

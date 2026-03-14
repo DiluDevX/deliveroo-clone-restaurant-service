@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const createCategorySchema = z.object({
   name: z.string().min(1, 'Name is required').max(200, 'Name is too long').trim(),
   sortOrder: z.number().int().min(0).default(0),
+  restaurant: z.string().min(1, 'Restaurant ID is required'),
 });
 
 export const updateCategorySchema = z
@@ -15,6 +16,9 @@ export const updateCategorySchema = z
   });
 
 export const categoryIdParamsSchema = z.object({
-  restaurantId: z.string().min(1, 'restaurantId is required'),
   categoryId: z.string().min(1, 'categoryId is required'),
+});
+
+export const categoryQuerySchema = z.object({
+  restaurant: z.string().min(1, 'Restaurant ID is required'),
 });
