@@ -1,18 +1,18 @@
-# node-template
+# deliveroo-clone-restaurant-service
 
-A production-ready TypeScript/Express microservice starter template with security-first design,
-full type safety, and a complete development workflow.
+A production-ready TypeScript/Express microservice for restaurant management in a Deliveroo clone application. Provides APIs for managing restaurants, categories, and dishes.
 
 ## Features
 
 - **TypeScript** with strict mode for full type safety
-- **Express.js** web framework
+- **Express.js 5.x** web framework
 - **Prisma ORM** with PostgreSQL
 - **Zod** for runtime input validation and environment variable validation
 - **Pino** structured logging (with pretty-printing in development)
-- **Security-first**: bcrypt password hashing, JWT authentication, timing-safe API key comparison
+- **Security-first**: API key authentication, timing-safe comparison
 - **Soft deletes** for data recovery
 - **Rate limiting** with configurable limiters
+- **API versioning** with routes under `/v1/`
 - **Conventional Commits** enforced via commitlint and Husky
 - **Docker** multi-stage build support
 - **GitHub Actions** CI/CD workflows
@@ -25,7 +25,7 @@ npm install
 
 # 2. Set up environment variables
 cp .env.example .env
-# Edit .env with your values (DATABASE_URL, JWT_SECRET, etc.)
+# Edit .env with your values (DATABASE_URL, API_KEY, SERVICE_NAME, etc.)
 
 # 3. Generate Prisma client
 npm run prisma:generate
@@ -43,15 +43,15 @@ npm run dev
 project-root/
 ├── src/
 │   ├── config/           # Environment and database configuration
-│   ├── controllers/      # Route handler functions
+│   ├── controllers/      # Route handler functions (common + v1)
 │   ├── dtos/             # Data Transfer Object type definitions
 │   ├── middleware/       # Express middleware (validation, auth, rate-limit, logging)
-│   ├── routes/           # Express route definitions
+│   ├── routes/           # Express route definitions (v1 for API routes)
 │   ├── schema/           # Zod validation schemas
 │   ├── services/         # Business logic and database services
 │   ├── types/            # Global TypeScript types
-│   ├── utils/            # Utility functions (errors, logger, jwt, password, html)
-│   └── server.ts         # Application entry point
+│   ├── utils/            # Utility functions (errors, logger, constants)
+│   └── index.ts          # Application entry point
 ├── prisma/
 │   └── schema.prisma     # Prisma data model
 ├── .github/workflows/    # CI/CD pipeline definitions
@@ -63,13 +63,15 @@ project-root/
 
 ## API Endpoints
 
-All routes are prefixed with `/api/v1`.
+All routes are prefixed with `/api/v1`. Authentication required via API key header.
 
 ### Health
 
-| Method | Path             | Description  |
-| ------ | ---------------- | ------------ |
-| GET    | `/api/v1/health` | Health check |
+| Method | Path            | Description     |
+| ------ | --------------- | --------------- |
+| GET    | `/health`       | Health check    |
+| GET    | `/health/ready` | Readiness check |
+| GET    | `/health/live`  | Liveness check  |
 
 **Response:**
 
@@ -85,68 +87,86 @@ All routes are prefixed with `/api/v1`.
 }
 ```
 
-### Users (Example Resource)
+### Restaurants
 
-| Method | Path                | Description      | Body             |
-| ------ | ------------------- | ---------------- | ---------------- |
-| GET    | `/api/v1/users`     | List all users   | -                |
-| GET    | `/api/v1/users/:id` | Get user by ID   | -                |
-| POST   | `/api/v1/users`     | Create a user    | See schema below |
-| PATCH  | `/api/v1/users/:id` | Update a user    | See schema below |
-| DELETE | `/api/v1/users/:id` | Soft-delete user | -                |
+| Method | Path                      | Description            | Body             |
+| ------ | ------------------------- | ---------------------- | ---------------- |
+| GET    | `/api/v1/restaurants`     | List all restaurants   | -                |
+| GET    | `/api/v1/restaurants/:id` | Get restaurant by ID   | -                |
+| POST   | `/api/v1/restaurants`     | Create a restaurant    | See schema below |
+| PATCH  | `/api/v1/restaurants/:id` | Update a restaurant    | See schema below |
+| DELETE | `/api/v1/restaurants/:id` | Soft-delete restaurant | -                |
 
-**Create User Body:**
+### Categories
 
-```json
-{
-  "firstName": "Jane",
-  "lastName": "Doe",
-  "email": "jane@example.com",
-  "password": "SecurePass1"
-}
-```
+| Method | Path                                               | Description          | Body             |
+| ------ | -------------------------------------------------- | -------------------- | ---------------- |
+| GET    | `/api/v1/restaurants/:restaurantId/categories`     | List categories      | -                |
+| GET    | `/api/v1/restaurants/:restaurantId/categories/:id` | Get category         | -                |
+| POST   | `/api/v1/restaurants/:restaurantId/categories`     | Create a category    | See schema below |
+| PATCH  | `/api/v1/restaurants/:restaurantId/categories/:id` | Update category      | See schema below |
+| DELETE | `/api/v1/restaurants/:restaurantId/categories/:id` | Soft-delete category | -                |
+
+### Dishes
+
+| Method | Path                                           | Description      | Body             |
+| ------ | ---------------------------------------------- | ---------------- | ---------------- |
+| GET    | `/api/v1/restaurants/:restaurantId/dishes`     | List dishes      | -                |
+| GET    | `/api/v1/restaurants/:restaurantId/dishes/:id` | Get dish         | -                |
+| POST   | `/api/v1/restaurants/:restaurantId/dishes`     | Create a dish    | See schema below |
+| PATCH  | `/api/v1/restaurants/:restaurantId/dishes/:id` | Update dish      | See schema below |
+| DELETE | `/api/v1/restaurants/:restaurantId/dishes/:id` | Soft-delete dish | -                |
+
+**Authentication:** All `/api/v1/*` endpoints require:
+
+- `x-api-key` header with the API key
+- `x-actor-type` header to identify the actor type (optional)
+- `x-actor-id` or `x-actor-user-id` headers for actor identification (optional)
 
 ## Environment Variables
 
-| Variable         | Required | Default        | Description                       |
-| ---------------- | -------- | -------------- | --------------------------------- |
-| `NODE_ENV`       | No       | `development`  | `development` or `production`     |
-| `PORT`           | No       | `3000`         | HTTP server port                  |
-| `DATABASE_URL`   | **Yes**  | -              | PostgreSQL connection string      |
-| `JWT_SECRET`     | **Yes**  | -              | JWT signing secret (min 32 chars) |
-| `JWT_EXPIRY`     | No       | `3600`         | JWT expiry in seconds             |
-| `SERVICE_NAME`   | No       | `microservice` | Service name used in logs         |
-| `LOG_LEVEL`      | No       | `info`         | Pino log level                    |
-| `DOPPLER_TOKEN`  | No       | -              | Doppler secrets manager token     |
-| `DOPPLER_CONFIG` | No       | -              | Doppler config name               |
+| Variable               | Required | Default       | Description                            |
+| ---------------------- | -------- | ------------- | -------------------------------------- |
+| `NODE_ENV`             | No       | `development` | `development`, `production`, or `test` |
+| `PORT`                 | No       | `3002`        | HTTP server port                       |
+| `DATABASE_URL`         | **Yes**  | -             | PostgreSQL connection string           |
+| `API_KEY`              | **Yes**  | -             | API key for authentication             |
+| `SERVICE_NAME`         | **Yes**  | -             | Service name used in logs              |
+| `LOG_LEVEL`            | No       | `info`        | Pino log level                         |
+| `APP_VERSION`          | No       | `1.0.0`       | Application version                    |
+| `RATE_LIMIT_WINDOW_MS` | No       | varies        | Rate limit window in milliseconds      |
+| `RATE_LIMIT_MAX`       | No       | varies        | Max requests per window                |
 
 ## Development Commands
 
 ```bash
 npm run dev               # Start with nodemon (hot reload)
 npm run build             # Compile TypeScript to dist/
-npm run start:development # Run compiled app
+npm run start:development # Run compiled app (development)
 npm run start:production  # Run compiled app (production)
 npm run lint:check        # Check for lint errors
 npm run lint:fix          # Auto-fix lint errors
 npm run format:check      # Check formatting
-npm run format:fix        # Auto-fix formatting
-npm run types:check       # Type-check without emitting
-npm run prisma:generate   # Generate Prisma client
-npm run prisma:migrate:new# Create and run a new migration
+npm run format:fix       # Auto-fix formatting
+npm run types:check      # Type-check without emitting
+npm run prisma:generate  # Generate Prisma client
+npm run prisma:migrate:new # Create and run a new migration
+npm run prisma:push      # Push schema to DB without migration
+npm run prisma:studio    # Open Prisma Studio
 ```
 
 ## Docker
 
 ```bash
 # Build the image
-docker build -t my-service .
+docker build -t deliveroo-clone-restaurant-service .
 
 # Run the container
-docker run -p 3000:3000 \
+docker run -p 3002:3002 \
   -e DATABASE_URL=postgresql://... \
-  -e JWT_SECRET=your-32-char-secret \
-  my-service
+  -e API_KEY=your-api-key \
+  -e SERVICE_NAME=restaurant-service \
+  deliveroo-clone-restaurant-service
 ```
 
 ## Deployment
@@ -175,13 +195,13 @@ Go to **Repository Settings → Secrets and variables → Actions** and add thes
 
 #### Required Variables
 
-| Variable         | Description                   | Example           |
-| ---------------- | ----------------------------- | ----------------- |
-| `AWS_REGION`     | AWS region                    | `us-east-1`       |
-| `ECR_REPOSITORY` | ECR repository name           | `my-service`      |
-| `CONTAINER_NAME` | Docker container name         | `my-service`      |
-| `CONTAINER_PORT` | Container port                | `3000`            |
-| `SECRET`         | AWS Secrets Manager secret ID | `my-service/prod` |
+| Variable         | Description                   | Example                   |
+| ---------------- | ----------------------------- | ------------------------- |
+| `AWS_REGION`     | AWS region                    | `us-east-1`               |
+| `ECR_REPOSITORY` | ECR repository name           | `restaurant-service`      |
+| `CONTAINER_NAME` | Docker container name         | `restaurant-service`      |
+| `CONTAINER_PORT` | Container port                | `3002`                    |
+| `SECRET`         | AWS Secrets Manager secret ID | `restaurant-service/prod` |
 
 ### AWS Secrets Manager Setup
 
@@ -194,26 +214,15 @@ Create a secret in AWS Secrets Manager with all required environment variables:
 ```json
 {
   "DATABASE_URL": "postgresql://user:password@host:5432/dbname",
-  "JWT_SECRET": "your-jwt-secret-min-32-chars",
-  "JWT_EXPIRES_IN": "15",
-  "JWT_REFRESH_EXPIRES_IN": "7",
-  "JWT_RESET_PASSWORD_EXPIRES_IN": "1",
-  "DELIVEROO_CLONE_API_KEY": "your-api-key",
-  "SERVICE_NAME": "my-service",
-  "PORT": "3000",
+  "API_KEY": "your-api-key",
+  "SERVICE_NAME": "restaurant-service",
+  "PORT": "3002",
   "NODE_ENV": "production",
-  "LOG_LEVEL": "info",
-  "BASE_URL": "https://api.example.com",
-  "COMPANY_NAME": "My Company",
-  "COMPANY_EMAIL": "noreply@example.com",
-  "LOGO_URL": "https://example.com/logo.png",
-  "SUPPORT_EMAIL": "support@example.com",
-  "APP_URL": "https://example.com",
-  "RESEND_API_KEY": "re_xxxxxxxxxxxx"
+  "LOG_LEVEL": "info"
 }
 ```
 
-4. Name the secret (e.g., `my-service/prod`) - use this as the `SECRET` variable in GitHub
+4. Name the secret (e.g., `restaurant-service/prod`) - use this as the `SECRET` variable in GitHub
 
 ### IAM Policy for Deploy User
 
@@ -249,7 +258,7 @@ Create an IAM user with this policy:
 
 You can manually trigger releases from GitHub Actions:
 
-1. Go to **Actions → CI/CD — Production Release** (or Development)
+1. Go to **Actions → Production Release** (or Development)
 2. Click **Run workflow**
 3. Select the environment and click **Run workflow**
 
