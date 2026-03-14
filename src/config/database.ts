@@ -1,9 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { logger } from '../utils/logger';
 import { environment } from './environment';
-import { EnvironmentEnum } from '../utils/constants';
-import { PRISMA_CODE } from '../utils/constants';
-
+import { EnvironmentEnum, PRISMA_CODE } from '../utils/constants';
 declare global {
   var __prisma: PrismaClient | undefined;
 }
