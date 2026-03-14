@@ -1,5 +1,5 @@
 {
-  "name": "node-template",
+  "name": "deliveroo-clone-restaurant-service",
   "version": "1.0.0",
   "description": "Production-ready TypeScript/Express node microservice starter template",
   "main": "dist/index.js",
@@ -7,12 +7,11 @@
     "node": ">=24"
   },
   "scripts": {
+    "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "dev": "nodemon src/server.ts",
-    "release": "semantic-release",
-    "release:dry-run": "semantic-release --dry-run",
-    "start:development": "node dist/server.js",
-    "start:production": "node dist/server.js",
+    "start": "node dist/src/index.js",
+    "start:development": "node dist/src/index.js",
+    "start:production": "node dist/src/index.js",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
     "lint:check": "eslint src",

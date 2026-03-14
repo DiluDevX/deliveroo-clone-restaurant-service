@@ -1,17 +1,85 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
 }
 
-model Item {
-  id          String    @id @default(uuid())
-  name        String
-  description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+enum RestaurantStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum DishTag {
+  BESTSELLER
+  NEW
+  SPECIAL
+}
+
+model Restaurant {
+  id                   String           @id @default(auto()) @map("_id") @db.ObjectId
+  orgId                String           @unique
+  name                 String
+  image                String
+  description          String?
+  tags                 String[]
+  openingAt            String
+  closingAt            String
+  minimumValue         Float
+  deliveryCharge       Float
+  commissionPercentage Float            @default(15)
+  cuisine              String?
+  rating               Float            @default(0)
+  status               RestaurantStatus @default(ACTIVE)
+
+  categories           Category[]
+  dishes               Dish[]
+
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  deletedAt            DateTime?
+
+  @@index([status])
+  @@index([cuisine])
+}
+
+model Category {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantId String     @db.ObjectId
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  name         String
+  sortOrder    Int        @default(0)
+  dishes       Dish[]
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
+
+  @@index([restaurantId])
+}
+
+model Dish {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantId String     @db.ObjectId
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  categoryId   String     @db.ObjectId
+  category     Category   @relation(fields: [categoryId], references: [id])
+  name         String
+  description  String?
+  price        Float
+  image        String?
+  isVegetarian Boolean    @default(false)
+  isSpicy      Boolean    @default(false)
+  isAvailable  Boolean    @default(true)
+  tags         DishTag[]
+  sortOrder    Int        @default(0)
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
+
+  @@index([restaurantId])
+  @@index([categoryId])
+  @@index([isAvailable])
 }
