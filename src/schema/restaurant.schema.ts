@@ -33,7 +33,23 @@ export const updateRestaurantSchema = z
   });
 
 export const listRestaurantsQuerySchema = z.object({
+  search: z.string().optional(),
   cuisine: z.string().optional(),
+  status: z.enum(['ACTIVE', 'DISABLED']).optional(),
+  tags: z.string().optional(), // comma-separated tags
+
+  // Rating filter
+  rating: z.coerce.number().min(0).max(5).optional(),
+
+  // Price filters
+  minDeliveryFee: z.coerce.number().min(0).optional(),
+  maxDeliveryFee: z.coerce.number().min(0).optional(),
+  minOrderValue: z.coerce.number().min(0).optional(),
+
+  // Open now filter
+  isOpen: z.enum(['true', 'false']).optional(),
+
+  // Pagination
   page: z.string().optional(),
   limit: z.string().optional(),
   sort: z.string().optional(),

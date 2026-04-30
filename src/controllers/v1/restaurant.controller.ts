@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import * as restaurantService from '../../services/restaurant.database.service';
 import { logger } from '../../utils/logger';
-import { CommonResponseDTO } from '../../dtos/common.dto';
+import { CommonResponseDTO, PaginatedResponseDTO } from '../../dtos/common.dto';
 import {
   CreateRestaurantDTO,
   UpdateRestaurantDTO,
@@ -25,21 +25,30 @@ function stripCommission(
 }
 
 export const listRestaurants = async (
-  req: Request<
-    unknown,
-    CommonResponseDTO<RestaurantResponseDTO[]>,
-    unknown,
-    ListRestaurantsQueryDTO
-  >,
-  res: Response<CommonResponseDTO<RestaurantResponseDTO[]>>,
+  req: Request<unknown, unknown, unknown, ListRestaurantsQueryDTO>,
+  res: Response<PaginatedResponseDTO<RestaurantResponseDTO>>,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { cuisine, page, limit, sort } = req.query;
+    const {
+      search,
+      cuisine,
+      status,
+      tags,
+      rating,
+      minDeliveryFee,
+      maxDeliveryFee,
+      minOrderValue,
+      isOpen,
+      page,
+      limit,
+      sort,
+    } = req.query;
+
     const actor = req.actor;
 
-    const parsedPage = page ? parseInt(page, 10) : 1;
-    const parsedLimit = limit ? parseInt(limit, 10) : 20;
+    const parsedPage = page ? Number.parseInt(page, 10) : 1;
+    const parsedLimit = limit ? Number.parseInt(limit, 10) : 20;
     const skip = (parsedPage - 1) * parsedLimit;
 
     let orderBy: Prisma.RestaurantOrderByWithRelationInput = { createdAt: 'desc' };
@@ -50,9 +59,21 @@ export const listRestaurants = async (
       }
     }
 
-    const restaurants = await restaurantService.findMany(
+    const filters = {
+      search,
+      cuisine,
+      status: status,
+      tags: tags,
+      rating: Number(rating),
+      minDeliveryFee: Number(minDeliveryFee),
+      maxDeliveryFee: Number(maxDeliveryFee),
+      minOrderValue: Number(minOrderValue),
+      isOpen: isOpen === 'true',
+    };
+
+    const { data: restaurants, total } = await restaurantService.findMany(
       actor,
-      { cuisine },
+      filters,
       { skip, take: parsedLimit },
       orderBy
     );
@@ -62,12 +83,26 @@ export const listRestaurants = async (
       stripCommission(r as RestaurantResponseDTO & { commissionPercentage: number }, isAdmin)
     );
 
-    logger.info({ count: restaurants.length }, 'restaurants listed');
+    const totalPages = Math.ceil(total / parsedLimit);
+
+    logger.info({
+      msg: 'Restaurants listed',
+      count: restaurants.length,
+      page: parsedPage,
+      limit: parsedLimit,
+      total,
+    });
 
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Restaurants retrieved successfully',
       data,
+      pagination: {
+        page: parsedPage,
+        limit: parsedLimit,
+        total,
+        totalPages,
+      },
     });
   } catch (error) {
     logger.error(error, 'list restaurants error');

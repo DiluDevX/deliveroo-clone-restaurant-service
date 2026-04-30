@@ -29,3 +29,9 @@ export interface RestaurantResponseDTO {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface PaginationMetadataDTO {
+  page: number;
+  limit: number;
+  total: number;
+}

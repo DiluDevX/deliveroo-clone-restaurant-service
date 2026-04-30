@@ -23,17 +23,12 @@ export const listDishes = async (
   try {
     const { category, restaurant, isVegetarian, isAvailable } = req.query as ListDishesQueryDTO;
 
-    let restaurantId = restaurant;
-    if (restaurantId && category) {
-      const cat = await categoryService.findOneById(category, restaurantId);
-      if (cat) {
-        restaurantId = cat.restaurantId;
-      }
-    } else {
+    const restaurantId = restaurant ?? undefined;
+    if (category && !restaurantId) {
       throw new ForbiddenError('Restaurant ID is required when filtering by category');
     }
 
-    const dishes = await dishService.findManyByRestaurant(restaurantId, {
+    const dishes = await dishService.findManyByRestaurant(restaurantId ?? '', {
       categoryId: category,
       isVegetarian,
       isAvailable,

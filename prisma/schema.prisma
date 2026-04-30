@@ -43,6 +43,11 @@ model Restaurant {
 
   @@index([status])
   @@index([cuisine])
+  @@index([rating])
+  @@index([deliveryCharge])
+  @@index([minimumValue])
+  @@index([name])
+  @@index([createdAt])
 }
 
 model Category {

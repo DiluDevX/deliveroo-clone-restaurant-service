@@ -4,14 +4,14 @@ import { CategoryNotFoundError } from '../utils/errors';
 
 export async function findManyByRestaurant(restaurantId: string): Promise<Category[]> {
   return prisma.category.findMany({
-    where: { restaurantId, deletedAt: null },
+    where: { restaurantId },
     orderBy: { sortOrder: 'asc' },
   });
 }
 
-export async function findOneById(id: string, restaurantId: string): Promise<Category | null> {
+export async function findOneById(id: string, restaurantId?: string): Promise<Category | null> {
   return prisma.category.findFirst({
-    where: { id, restaurantId, deletedAt: null },
+    where: { id, ...(restaurantId ? { restaurantId } : {}) },
   });
 }
 
@@ -33,7 +33,7 @@ export async function update(
   data: Prisma.CategoryUpdateInput
 ): Promise<Category> {
   const category = await prisma.category.findFirst({
-    where: { id, restaurantId, deletedAt: null },
+    where: { id, restaurantId },
   });
 
   if (!category) {
@@ -50,7 +50,7 @@ export async function update(
 
 export async function softDelete(id: string, restaurantId: string): Promise<Category> {
   const category = await prisma.category.findFirst({
-    where: { id, restaurantId, deletedAt: null },
+    where: { id, restaurantId },
   });
 
   if (!category) {
