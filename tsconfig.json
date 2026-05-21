@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2023",
-    "module": "CommonJS",
-    "lib": ["ES2021"],
-    "outDir": "./dist",
+    "module": "NodeNext",
+    "lib": ["ES2023"],
     "strict": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
@@ -24,7 +23,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "skipLibCheck": true,
-    "moduleResolution": "Node"
+    "moduleResolution": "NodeNext"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

@@ -63,7 +63,7 @@ project-root/
 
 ## API Endpoints
 
-All routes are prefixed with `/api/v1`. Authentication required via API key header.
+All routes are prefixed with `/v1`. Authentication required via API key header.
 
 ### Health
 
@@ -89,35 +89,35 @@ All routes are prefixed with `/api/v1`. Authentication required via API key head
 
 ### Restaurants
 
-| Method | Path                      | Description            | Body             |
-| ------ | ------------------------- | ---------------------- | ---------------- |
-| GET    | `/api/v1/restaurants`     | List all restaurants   | -                |
-| GET    | `/api/v1/restaurants/:id` | Get restaurant by ID   | -                |
-| POST   | `/api/v1/restaurants`     | Create a restaurant    | See schema below |
-| PATCH  | `/api/v1/restaurants/:id` | Update a restaurant    | See schema below |
-| DELETE | `/api/v1/restaurants/:id` | Soft-delete restaurant | -                |
+| Method | Path                  | Description            | Body             |
+| ------ | --------------------- | ---------------------- | ---------------- |
+| GET    | `/v1/restaurants`     | List all restaurants   | -                |
+| GET    | `/v1/restaurants/:id` | Get restaurant by ID   | -                |
+| POST   | `/v1/restaurants`     | Create a restaurant    | See schema below |
+| PATCH  | `/v1/restaurants/:id` | Update a restaurant    | See schema below |
+| DELETE | `/v1/restaurants/:id` | Soft-delete restaurant | -                |
 
 ### Categories
 
-| Method | Path                                               | Description          | Body             |
-| ------ | -------------------------------------------------- | -------------------- | ---------------- |
-| GET    | `/api/v1/restaurants/:restaurantId/categories`     | List categories      | -                |
-| GET    | `/api/v1/restaurants/:restaurantId/categories/:id` | Get category         | -                |
-| POST   | `/api/v1/restaurants/:restaurantId/categories`     | Create a category    | See schema below |
-| PATCH  | `/api/v1/restaurants/:restaurantId/categories/:id` | Update category      | See schema below |
-| DELETE | `/api/v1/restaurants/:restaurantId/categories/:id` | Soft-delete category | -                |
+| Method | Path                                           | Description          | Body             |
+| ------ | ---------------------------------------------- | -------------------- | ---------------- |
+| GET    | `/v1/restaurants/:restaurantId/categories`     | List categories      | -                |
+| GET    | `/v1/restaurants/:restaurantId/categories/:id` | Get category         | -                |
+| POST   | `/v1/restaurants/:restaurantId/categories`     | Create a category    | See schema below |
+| PATCH  | `/v1/restaurants/:restaurantId/categories/:id` | Update category      | See schema below |
+| DELETE | `/v1/restaurants/:restaurantId/categories/:id` | Soft-delete category | -                |
 
 ### Dishes
 
-| Method | Path                                           | Description      | Body             |
-| ------ | ---------------------------------------------- | ---------------- | ---------------- |
-| GET    | `/api/v1/restaurants/:restaurantId/dishes`     | List dishes      | -                |
-| GET    | `/api/v1/restaurants/:restaurantId/dishes/:id` | Get dish         | -                |
-| POST   | `/api/v1/restaurants/:restaurantId/dishes`     | Create a dish    | See schema below |
-| PATCH  | `/api/v1/restaurants/:restaurantId/dishes/:id` | Update dish      | See schema below |
-| DELETE | `/api/v1/restaurants/:restaurantId/dishes/:id` | Soft-delete dish | -                |
+| Method | Path                                       | Description      | Body             |
+| ------ | ------------------------------------------ | ---------------- | ---------------- |
+| GET    | `/v1/restaurants/:restaurantId/dishes`     | List dishes      | -                |
+| GET    | `/v1/restaurants/:restaurantId/dishes/:id` | Get dish         | -                |
+| POST   | `/v1/restaurants/:restaurantId/dishes`     | Create a dish    | See schema below |
+| PATCH  | `/v1/restaurants/:restaurantId/dishes/:id` | Update dish      | See schema below |
+| DELETE | `/v1/restaurants/:restaurantId/dishes/:id` | Soft-delete dish | -                |
 
-**Authentication:** All `/api/v1/*` endpoints require:
+**Authentication:** All `/v1/*` endpoints require:
 
 - `x-api-key` header with the API key
 - `x-actor-type` header to identify the actor type (optional)

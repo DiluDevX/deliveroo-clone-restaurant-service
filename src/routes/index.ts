@@ -11,9 +11,9 @@ const router = Router();
 
 const authMiddleware = [apiKeyMiddleware([environment.apiKey]), actorMiddleware];
 
-router.use('/api/v1/restaurants', ...authMiddleware, restaurantRoutes);
-router.use('/api/v1/categories', ...authMiddleware, categoryRoutes);
-router.use('/api/v1/dishes', ...authMiddleware, dishRoutes);
+router.use('/v1/restaurants', ...authMiddleware, restaurantRoutes);
+router.use('/v1/categories', ...authMiddleware, categoryRoutes);
+router.use('/v1/dishes', ...authMiddleware, dishRoutes);
 
 router.use(commonRoutes);
 
