@@ -1,3 +1,10 @@
+# [1.0.0-beta.2](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2026-05-27)
+
+
+### Features
+
+* add DATABASE_URL environment variable for Docker and Azure deployment ([ffaa350](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/ffaa3502e2aa1ab657deb5f173648afed3488842))
+
 # 1.0.0-beta.1 (2026-05-27)
 
 ### Bug Fixes
