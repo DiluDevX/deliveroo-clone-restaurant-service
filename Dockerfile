@@ -1,5 +1,8 @@
 FROM node:24-alpine AS builder
 
+ARG DATABASE_URL=mongodb://localhost:27017/restaurant-service
+ENV DATABASE_URL=$DATABASE_URL
+
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
