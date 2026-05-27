@@ -9,9 +9,9 @@
   "scripts": {
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "start": "node dist/src/index.js",
-    "start:development": "node dist/src/index.js",
-    "start:production": "node dist/src/index.js",
+    "start": "node dist/index.js",
+    "start:development": "node dist/index.js",
+    "start:production": "node dist/index.js",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
     "lint:check": "eslint src",

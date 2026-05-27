@@ -1,5 +1,4 @@
-#!/usr/bin/env sh
-. "$(dirname "$0")/_/husky.sh"
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 npm run lint:check
 npm run types:check
