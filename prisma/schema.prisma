@@ -23,6 +23,7 @@ model Restaurant {
   orgId                String           @unique
   name                 String
   image                String
+  address              String?
   description          String?
   tags                 String[]
   openingAt            String

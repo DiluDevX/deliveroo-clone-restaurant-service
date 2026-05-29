@@ -162,6 +162,7 @@ export const createRestaurant = async (
       orgId: req.body.orgId,
       name: req.body.name,
       image: req.body.image,
+      address: req.body.address,
       description: req.body.description,
       tags: req.body.tags,
       openingAt: req.body.openingAt,

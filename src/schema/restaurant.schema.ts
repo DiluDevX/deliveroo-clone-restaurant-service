@@ -4,6 +4,7 @@ export const createRestaurantSchema = z.object({
   orgId: z.string().min(1, 'orgId is required'),
   name: z.string().min(1, 'Name is required').max(200, 'Name is too long').trim(),
   image: z.string().url('Image must be a valid URL'),
+  address: z.string().max(500, 'Address is too long').trim().optional(),
   description: z.string().max(1000, 'Description is too long').trim().optional(),
   tags: z.array(z.string().trim()).default([]),
   openingAt: z.string().min(1, 'Opening time is required'),
@@ -18,6 +19,7 @@ export const updateRestaurantSchema = z
   .object({
     name: z.string().min(1, 'Name is required').max(200, 'Name is too long').trim().optional(),
     image: z.string().url('Image must be a valid URL').optional(),
+    address: z.string().max(500, 'Address is too long').trim().optional(),
     description: z.string().max(1000, 'Description is too long').trim().optional(),
     tags: z.array(z.string().trim()).optional(),
     openingAt: z.string().optional(),
@@ -32,29 +34,50 @@ export const updateRestaurantSchema = z
     message: 'At least one field must be provided for update',
   });
 
-export const listRestaurantsQuerySchema = z.object({
-  search: z.string().optional(),
-  cuisine: z.string().optional(),
-  status: z.enum(['ACTIVE', 'DISABLED']).optional(),
-  tags: z.string().optional(), // comma-separated tags
+export const listRestaurantsQuerySchema = z
+  .object({
+    search: z.string().optional(),
+    cuisine: z.string().optional(),
+    status: z.enum(['ACTIVE', 'DISABLED']).optional(),
+    tags: z.string().optional(), // comma-separated tags
 
-  // Rating filter
-  rating: z.coerce.number().min(0).max(5).optional(),
+    // Rating filter
+    rating: z.coerce.number().min(0).max(5).optional(),
 
-  // Price filters
-  minDeliveryFee: z.coerce.number().min(0).optional(),
-  maxDeliveryFee: z.coerce.number().min(0).optional(),
-  minOrderValue: z.coerce.number().min(0).optional(),
-  maxOrderValue: z.coerce.number().min(0).optional(),
+    // Price filters
+    minDeliveryFee: z.coerce.number().min(0).optional(),
+    maxDeliveryFee: z.coerce.number().min(0).optional(),
+    minOrderValue: z.coerce.number().min(0).optional(),
+    maxOrderValue: z.coerce.number().min(0).optional(),
 
-  // Open now filter
-  isOpen: z.enum(['true', 'false']).optional(),
+    // Open now filter
+    isOpen: z.enum(['true', 'false']).optional(),
 
-  // Pagination
-  page: z.string().optional(),
-  limit: z.string().optional(),
-  sort: z.string().optional(),
-});
+    // Pagination
+    page: z.string().optional(),
+    limit: z.string().optional(),
+    sort: z.string().optional(),
+  })
+  .refine(
+    (data) =>
+      data.minDeliveryFee === undefined ||
+      data.maxDeliveryFee === undefined ||
+      data.minDeliveryFee <= data.maxDeliveryFee,
+    {
+      message: 'minDeliveryFee must be less than or equal to maxDeliveryFee',
+      path: ['minDeliveryFee'],
+    }
+  )
+  .refine(
+    (data) =>
+      data.minOrderValue === undefined ||
+      data.maxOrderValue === undefined ||
+      data.minOrderValue <= data.maxOrderValue,
+    {
+      message: 'minOrderValue must be less than or equal to maxOrderValue',
+      path: ['minOrderValue'],
+    }
+  );
 
 export const restaurantIdParamsSchema = z.object({
   restaurantId: z.string().min(1, 'restaurantId is required'),
