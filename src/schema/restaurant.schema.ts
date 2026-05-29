@@ -45,6 +45,7 @@ export const listRestaurantsQuerySchema = z.object({
   minDeliveryFee: z.coerce.number().min(0).optional(),
   maxDeliveryFee: z.coerce.number().min(0).optional(),
   minOrderValue: z.coerce.number().min(0).optional(),
+  maxOrderValue: z.coerce.number().min(0).optional(),
 
   // Open now filter
   isOpen: z.enum(['true', 'false']).optional(),

@@ -43,6 +43,7 @@ export async function findMany(
     minDeliveryFee?: number;
     maxDeliveryFee?: number;
     minOrderValue?: number;
+    maxOrderValue?: number;
     isOpen?: boolean;
   },
   pagination: { skip?: number; take?: number },
@@ -53,18 +54,29 @@ export async function findMany(
   // Get current time for isOpen filter
   const now = new Date();
   const currentTime = now.toTimeString().slice(0, 5); // "HH:MM" format
+  const hasNumber = (value?: number): value is number =>
+    value !== undefined && !Number.isNaN(value);
+  const deliveryChargeFilter = {
+    ...(hasNumber(filters.minDeliveryFee) ? { gte: filters.minDeliveryFee } : {}),
+    ...(hasNumber(filters.maxDeliveryFee) ? { lte: filters.maxDeliveryFee } : {}),
+  };
+  const minimumValueFilter = {
+    ...(hasNumber(filters.minOrderValue) ? { gte: filters.minOrderValue } : {}),
+    ...(hasNumber(filters.maxOrderValue) ? { lte: filters.maxOrderValue } : {}),
+  };
 
   const where: Prisma.RestaurantWhereInput = {
     ...(isAdmin && filters.status
-      ? { status: filters.status as RestaurantStatus }
+      ? { status: filters.status }
       : !isAdmin
         ? { status: RestaurantStatus.ACTIVE }
         : {}),
     ...(filters.cuisine ? { cuisine: filters.cuisine } : {}),
-    ...(filters.rating ? { rating: { gte: filters.rating } } : {}),
-    ...(filters.minDeliveryFee ? { deliveryCharge: { gte: filters.minDeliveryFee } } : {}),
-    ...(filters.maxDeliveryFee ? { deliveryCharge: { lte: filters.maxDeliveryFee } } : {}),
-    ...(filters.minOrderValue ? { minimumValue: { gte: filters.minOrderValue } } : {}),
+    ...(hasNumber(filters.rating) ? { rating: { gte: filters.rating } } : {}),
+    ...(Object.keys(deliveryChargeFilter).length > 0
+      ? { deliveryCharge: deliveryChargeFilter }
+      : {}),
+    ...(Object.keys(minimumValueFilter).length > 0 ? { minimumValue: minimumValueFilter } : {}),
     ...(filters.tags ? { tags: { hasSome: filters.tags.split(',') } } : {}),
     ...(filters.search
       ? {

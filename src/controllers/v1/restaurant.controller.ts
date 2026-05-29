@@ -39,6 +39,7 @@ export const listRestaurants = async (
       minDeliveryFee,
       maxDeliveryFee,
       minOrderValue,
+      maxOrderValue,
       isOpen,
       page,
       limit,
@@ -68,6 +69,7 @@ export const listRestaurants = async (
       minDeliveryFee: Number(minDeliveryFee),
       maxDeliveryFee: Number(maxDeliveryFee),
       minOrderValue: Number(minOrderValue),
+      maxOrderValue: Number(maxOrderValue),
       isOpen: isOpen === 'true',
     };
 
