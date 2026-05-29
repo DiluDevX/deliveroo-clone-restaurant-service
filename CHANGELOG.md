@@ -1,3 +1,10 @@
+# [1.0.0-beta.3](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2026-05-29)
+
+
+### Features
+
+* add maxOrderValue filter to restaurant queries and schema ([062008d](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/062008d487e2f361c38a5792382f9503c5216f95))
+
 # [1.0.0-beta.2](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2026-05-27)
 
 ### Features
