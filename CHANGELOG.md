@@ -1,9 +1,8 @@
 # [1.0.0-beta.4](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.3...v1.0.0-beta.4) (2026-05-29)
 
-
 ### Features
 
-* add address field to restaurant model and update related schemas ([0bed853](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/0bed853bb619743930641c3616246db6f369fd8b))
+- add address field to restaurant model and update related schemas ([0bed853](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/0bed853bb619743930641c3616246db6f369fd8b))
 
 # [1.0.0-beta.3](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2026-05-29)
 

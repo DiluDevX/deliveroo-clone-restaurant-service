@@ -9,6 +9,8 @@ export const createDishSchema = z.object({
   isVegetarian: z.boolean().default(false),
   isSpicy: z.boolean().default(false),
   isAvailable: z.boolean().default(true),
+  isPopular: z.boolean().default(false),
+  discountPercent: z.number().min(0).max(100).nullable().optional(),
   tags: z.array(z.enum(['BESTSELLER', 'NEW', 'SPECIAL'])).default([]),
   sortOrder: z.number().int().min(0).default(0),
 });
@@ -23,6 +25,8 @@ export const updateDishSchema = z
     isVegetarian: z.boolean().optional(),
     isSpicy: z.boolean().optional(),
     isAvailable: z.boolean().optional(),
+    isPopular: z.boolean().optional(),
+    discountPercent: z.number().min(0).max(100).nullable().optional(),
     tags: z.array(z.enum(['BESTSELLER', 'NEW', 'SPECIAL'])).optional(),
     sortOrder: z.number().int().min(0).optional(),
   })
@@ -38,6 +42,10 @@ export const listDishesQuerySchema = z.object({
     .optional()
     .transform((v) => (v === 'true' ? true : v === 'false' ? false : undefined)),
   isAvailable: z
+    .string()
+    .optional()
+    .transform((v) => (v === 'true' ? true : v === 'false' ? false : undefined)),
+  isPopular: z
     .string()
     .optional()
     .transform((v) => (v === 'true' ? true : v === 'false' ? false : undefined)),

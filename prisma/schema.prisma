@@ -79,6 +79,8 @@ model Dish {
   isVegetarian Boolean    @default(false)
   isSpicy      Boolean    @default(false)
   isAvailable  Boolean    @default(true)
+  isPopular    Boolean?   @default(false)
+  discountPercent Float?
   tags         DishTag[]
   sortOrder    Int        @default(0)
 

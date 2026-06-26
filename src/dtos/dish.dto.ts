@@ -22,6 +22,8 @@ export interface DishResponseDTO {
   isVegetarian: boolean;
   isSpicy: boolean;
   isAvailable: boolean;
+  isPopular: boolean | null;
+  discountPercent: number | null;
   tags: string[];
   sortOrder: number;
   createdAt: Date;

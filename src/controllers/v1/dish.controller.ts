@@ -21,7 +21,8 @@ export const listDishes = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { category, restaurant, isVegetarian, isAvailable } = req.query as ListDishesQueryDTO;
+    const { category, restaurant, isVegetarian, isAvailable, isPopular } =
+      req.query as ListDishesQueryDTO;
 
     const restaurantId = restaurant ?? undefined;
     if (category && !restaurantId) {
@@ -32,6 +33,7 @@ export const listDishes = async (
       categoryId: category,
       isVegetarian,
       isAvailable,
+      isPopular,
     });
 
     logger.info({ restaurantId, category, count: dishes.length }, 'dishes listed');
@@ -39,7 +41,7 @@ export const listDishes = async (
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Dishes retrieved successfully',
-      data: dishes as DishResponseDTO[],
+      data: dishes,
     });
   } catch (error) {
     logger.error(error, 'list dishes error');
@@ -66,7 +68,7 @@ export const getDish = async (
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Dish retrieved successfully',
-      data: dish as DishResponseDTO,
+      data: dish,
     });
   } catch (error) {
     logger.error(error, 'get dish error');
@@ -110,7 +112,9 @@ export const createDish = async (
       isVegetarian: req.body.isVegetarian,
       isSpicy: req.body.isSpicy,
       isAvailable: req.body.isAvailable,
-      tags: req.body.tags as DishTag[],
+      isPopular: req.body.isPopular,
+      discountPercent: req.body.discountPercent,
+      tags: req.body.tags,
       sortOrder: req.body.sortOrder,
     });
 
@@ -119,7 +123,7 @@ export const createDish = async (
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: 'Dish created successfully',
-      data: dish as DishResponseDTO,
+      data: dish,
     });
   } catch (error) {
     logger.error(error, 'create dish error');
@@ -156,6 +160,8 @@ export const updateDish = async (
       isVegetarian?: boolean;
       isSpicy?: boolean;
       isAvailable?: boolean;
+      isPopular?: boolean;
+      discountPercent?: number | null;
       tags?: DishTag[];
       sortOrder?: number;
     } = {};
@@ -168,7 +174,11 @@ export const updateDish = async (
     if (req.body.isVegetarian !== undefined) updateData.isVegetarian = req.body.isVegetarian;
     if (req.body.isSpicy !== undefined) updateData.isSpicy = req.body.isSpicy;
     if (req.body.isAvailable !== undefined) updateData.isAvailable = req.body.isAvailable;
-    if (req.body.tags !== undefined) updateData.tags = req.body.tags as DishTag[];
+    if (req.body.isPopular !== undefined) updateData.isPopular = req.body.isPopular;
+    if (req.body.discountPercent !== undefined) {
+      updateData.discountPercent = req.body.discountPercent;
+    }
+    if (req.body.tags !== undefined) updateData.tags = req.body.tags;
     if (req.body.sortOrder !== undefined) updateData.sortOrder = req.body.sortOrder;
 
     const updated = await dishService.update(dishId, dish.restaurantId, updateData);
@@ -178,7 +188,7 @@ export const updateDish = async (
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Dish updated successfully',
-      data: updated as DishResponseDTO,
+      data: updated,
     });
   } catch (error) {
     logger.error(error, 'update dish error');

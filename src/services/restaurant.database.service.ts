@@ -141,6 +141,8 @@ export async function findOneById(
           isVegetarian: boolean;
           isSpicy: boolean;
           isAvailable: boolean;
+          isPopular: boolean | null;
+          discountPercent: number | null;
           tags: string[];
           sortOrder: number;
         }[];
@@ -172,6 +174,8 @@ export async function findOneById(
               isVegetarian: true,
               isSpicy: true,
               isAvailable: true,
+              isPopular: true,
+              discountPercent: true,
               tags: true,
               sortOrder: true,
             },

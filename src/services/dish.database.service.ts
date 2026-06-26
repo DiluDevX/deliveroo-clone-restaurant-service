@@ -4,13 +4,19 @@ import { DishNotFoundError } from '../utils/errors';
 
 export async function findManyByRestaurant(
   restaurantId: string,
-  filters: { categoryId?: string; isVegetarian?: boolean; isAvailable?: boolean }
+  filters: {
+    categoryId?: string;
+    isVegetarian?: boolean;
+    isAvailable?: boolean;
+    isPopular?: boolean;
+  }
 ): Promise<Dish[]> {
   const where: Prisma.DishWhereInput = {
     ...(restaurantId ? { restaurantId } : {}),
     ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
     ...(filters.isVegetarian ? { isVegetarian: filters.isVegetarian } : {}),
     ...(filters.isAvailable ? { isAvailable: filters.isAvailable } : {}),
+    ...(filters.isPopular ? { isPopular: filters.isPopular } : {}),
   };
 
   return prisma.dish.findMany({
