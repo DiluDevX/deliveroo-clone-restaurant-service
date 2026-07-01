@@ -1,9 +1,8 @@
 # [1.0.0-beta.5](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.4...v1.0.0-beta.5) (2026-06-26)
 
-
 ### Features
 
-* add isPopular and discountPercent fields to Dish model and update related schemas ([3a08871](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/3a08871ab0a59dfa0640a43c2177ede6fe8f6e65))
+- add isPopular and discountPercent fields to Dish model and update related schemas ([3a08871](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/3a08871ab0a59dfa0640a43c2177ede6fe8f6e65))
 
 # [1.0.0-beta.4](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.3...v1.0.0-beta.4) (2026-05-29)
 

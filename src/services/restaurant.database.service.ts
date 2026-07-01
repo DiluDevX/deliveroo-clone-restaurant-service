@@ -15,14 +15,14 @@ export async function assertRestaurantOwnership(
   if (actor.type === 'RESTAURANT') {
     const restaurant = await prisma.restaurant.findFirst({
       where: { id: restaurantId, deletedAt: null },
-      select: { orgId: true },
+      select: { id: true, orgId: true },
     });
 
     if (!restaurant) {
       throw new RestaurantNotFoundError(`Restaurant with id ${restaurantId} not found`);
     }
 
-    if (restaurant.orgId !== actor.actorId) {
+    if (!actor.actorId || (restaurant.id !== actor.actorId && restaurant.orgId !== actor.actorId)) {
       throw new ForbiddenError('You do not have permission to access this restaurant');
     }
 
