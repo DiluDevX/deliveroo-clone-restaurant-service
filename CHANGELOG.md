@@ -1,3 +1,10 @@
+# [1.0.0-beta.7](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.6...v1.0.0-beta.7) (2026-07-13)
+
+
+### Features
+
+* implement actor permissions for menu management and refactor category/dish controllers ([d6a6147](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/d6a614794cb3740d3796a5bb47df802ae4b12443))
+
 # [1.0.0-beta.6](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.5...v1.0.0-beta.6) (2026-07-01)
 
 ### Bug Fixes
