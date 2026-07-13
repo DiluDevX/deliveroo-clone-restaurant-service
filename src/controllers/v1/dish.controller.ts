@@ -4,6 +4,7 @@ import * as dishService from '../../services/dish.database.service';
 import * as categoryService from '../../services/category.database.service';
 import * as restaurantService from '../../services/restaurant.database.service';
 import { logger } from '../../utils/logger';
+import { assertCanManageMenu } from '../../utils/actor-permissions';
 import { CommonResponseDTO } from '../../dtos/common.dto';
 import {
   CreateDishDTO,
@@ -12,7 +13,7 @@ import {
   DishIdParamsDTO,
   DishResponseDTO,
 } from '../../dtos/dish.dto';
-import { ForbiddenError, DishNotFoundError, RestaurantNotFoundError } from '../../utils/errors';
+import { DishNotFoundError, ForbiddenError, RestaurantNotFoundError } from '../../utils/errors';
 import { DishTag } from '@prisma/client';
 
 export const listDishes = async (
@@ -85,10 +86,7 @@ export const createDish = async (
     const { categoryId } = req.body;
     const actor = req.actor;
 
-    if (!actor || (actor.type !== 'ADMIN' && actor.type !== 'RESTAURANT')) {
-      throw new ForbiddenError('Only ADMIN or RESTAURANT actors can create dishes');
-    }
-
+    assertCanManageMenu(actor);
     const category = await categoryService.findOneById(categoryId, '');
     if (!category) {
       throw new RestaurantNotFoundError(`Category with id ${categoryId} not found`);
@@ -140,10 +138,7 @@ export const updateDish = async (
     const { dishId } = req.params;
     const actor = req.actor;
 
-    if (!actor || (actor.type !== 'ADMIN' && actor.type !== 'RESTAURANT')) {
-      throw new ForbiddenError('Only ADMIN or RESTAURANT actors can update dishes');
-    }
-
+    assertCanManageMenu(actor);
     const dish = await dishService.findOneById(dishId);
     if (!dish) {
       throw new DishNotFoundError(`Dish with id ${dishId} not found`);
@@ -205,10 +200,7 @@ export const deleteDish = async (
     const { dishId } = req.params;
     const actor = req.actor;
 
-    if (!actor || (actor.type !== 'ADMIN' && actor.type !== 'RESTAURANT')) {
-      throw new ForbiddenError('Only ADMIN or RESTAURANT actors can delete dishes');
-    }
-
+    assertCanManageMenu(actor);
     const dish = await dishService.findOneById(dishId);
     if (!dish) {
       throw new DishNotFoundError(`Dish with id ${dishId} not found`);

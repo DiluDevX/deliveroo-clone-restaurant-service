@@ -1,9 +1,8 @@
 # [1.0.0-beta.6](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.5...v1.0.0-beta.6) (2026-07-01)
 
-
 ### Bug Fixes
 
-* update restaurant ownership check to include restaurant ID in permission validation ([09d5230](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/09d5230d880109513a43447fda247ff4c702fb3f))
+- update restaurant ownership check to include restaurant ID in permission validation ([09d5230](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/09d5230d880109513a43447fda247ff4c702fb3f))
 
 # [1.0.0-beta.5](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.4...v1.0.0-beta.5) (2026-06-26)
 

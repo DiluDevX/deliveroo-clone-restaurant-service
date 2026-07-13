@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import * as categoryService from '../../services/category.database.service';
 import * as restaurantService from '../../services/restaurant.database.service';
 import { logger } from '../../utils/logger';
+import { assertCanManageMenu } from '../../utils/actor-permissions';
 import { CommonResponseDTO } from '../../dtos/common.dto';
 import {
   CreateCategoryDTO,
@@ -11,7 +12,7 @@ import {
   CategoryResponseDTO,
   CategoryQueryDTO,
 } from '../../dtos/category.dto';
-import { ForbiddenError, RestaurantNotFoundError } from '../../utils/errors';
+import { RestaurantNotFoundError } from '../../utils/errors';
 
 export const listCategories = async (
   req: Request,
@@ -45,10 +46,7 @@ export const createCategory = async (
     const { restaurant: restaurantId } = req.body;
     const actor = req.actor;
 
-    if (!actor || (actor.type !== 'ADMIN' && actor.type !== 'RESTAURANT')) {
-      throw new ForbiddenError('Only ADMIN or RESTAURANT actors can create categories');
-    }
-
+    assertCanManageMenu(actor);
     await restaurantService.assertRestaurantOwnership(restaurantId, actor);
 
     const restaurant = await restaurantService.findOneById(restaurantId, actor);
@@ -83,10 +81,7 @@ export const updateCategory = async (
     const { categoryId } = req.params;
     const actor = req.actor;
 
-    if (!actor || (actor.type !== 'ADMIN' && actor.type !== 'RESTAURANT')) {
-      throw new ForbiddenError('Only ADMIN or RESTAURANT actors can update categories');
-    }
-
+    assertCanManageMenu(actor);
     const category = await categoryService.findOneById(categoryId, '');
     if (!category) {
       throw new RestaurantNotFoundError(`Category with id ${categoryId} not found`);
@@ -118,10 +113,7 @@ export const deleteCategory = async (
     const { categoryId } = req.params;
     const actor = req.actor;
 
-    if (!actor || (actor.type !== 'ADMIN' && actor.type !== 'RESTAURANT')) {
-      throw new ForbiddenError('Only ADMIN or RESTAURANT actors can delete categories');
-    }
-
+    assertCanManageMenu(actor);
     const category = await categoryService.findOneById(categoryId, '');
     if (!category) {
       throw new RestaurantNotFoundError(`Category with id ${categoryId} not found`);
