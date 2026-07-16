@@ -139,6 +139,10 @@ Frontend currently calls /api/categories without always passing restaurant. The 
 | PATCH  | /v1/dishes/:dishId | Update dish |
 | DELETE | /v1/dishes/:dishId | Delete dish |
 
+Dish deletion is soft deletion. Deleted dishes are excluded from list and detail reads. Dish updates
+may set `image` to `null` to remove an existing image, and changing `categoryId` is restricted to a
+category owned by the same restaurant.
+
 List query params:
 
 - category
