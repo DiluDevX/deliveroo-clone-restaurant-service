@@ -13,7 +13,12 @@ import {
   DishIdParamsDTO,
   DishResponseDTO,
 } from '../../dtos/dish.dto';
-import { DishNotFoundError, ForbiddenError, RestaurantNotFoundError } from '../../utils/errors';
+import {
+  CategoryNotFoundError,
+  DishNotFoundError,
+  ForbiddenError,
+  RestaurantNotFoundError,
+} from '../../utils/errors';
 import { DishTag } from '@prisma/client';
 
 export const listDishes = async (
@@ -151,7 +156,7 @@ export const updateDish = async (
       name?: string;
       description?: string;
       price?: number;
-      image?: string;
+      image?: string | null;
       isVegetarian?: boolean;
       isSpicy?: boolean;
       isAvailable?: boolean;
@@ -161,7 +166,15 @@ export const updateDish = async (
       sortOrder?: number;
     } = {};
 
-    if (req.body.categoryId !== undefined) updateData.categoryId = req.body.categoryId;
+    if (req.body.categoryId !== undefined) {
+      const category = await categoryService.findOneById(req.body.categoryId, dish.restaurantId);
+      if (!category) {
+        throw new CategoryNotFoundError(
+          `Category with id ${req.body.categoryId} not found in this restaurant`
+        );
+      }
+      updateData.categoryId = req.body.categoryId;
+    }
     if (req.body.name !== undefined) updateData.name = req.body.name;
     if (req.body.description !== undefined) updateData.description = req.body.description;
     if (req.body.price !== undefined) updateData.price = req.body.price;

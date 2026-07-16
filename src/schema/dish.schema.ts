@@ -21,7 +21,7 @@ export const updateDishSchema = z
     name: z.string().min(1, 'Name is required').max(200, 'Name is too long').trim().optional(),
     description: z.string().max(1000, 'Description is too long').trim().optional(),
     price: z.number().min(0, 'Price must be non-negative').optional(),
-    image: z.string().url('Image must be a valid URL').optional(),
+    image: z.string().url('Image must be a valid URL').nullable().optional(),
     isVegetarian: z.boolean().optional(),
     isSpicy: z.boolean().optional(),
     isAvailable: z.boolean().optional(),
