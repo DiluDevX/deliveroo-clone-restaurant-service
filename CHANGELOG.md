@@ -1,9 +1,8 @@
 # [1.0.0-beta.8](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.7...v1.0.0-beta.8) (2026-07-16)
 
-
 ### Features
 
-* enhance dish management with soft deletion and category validation ([943c870](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/943c870f65ca571ca698f6fddffee97876ce4787))
+- enhance dish management with soft deletion and category validation ([943c870](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/943c870f65ca571ca698f6fddffee97876ce4787))
 
 # [1.0.0-beta.7](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.6...v1.0.0-beta.7) (2026-07-13)
 
