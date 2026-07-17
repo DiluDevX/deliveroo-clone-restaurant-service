@@ -2,16 +2,20 @@ import { Prisma, Category } from '@prisma/client';
 import { prisma } from '../config/database';
 import { CategoryNotFoundError } from '../utils/errors';
 
+const activeCategoryWhere: Prisma.CategoryWhereInput = {
+  OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+};
+
 export async function findManyByRestaurant(restaurantId: string): Promise<Category[]> {
   return prisma.category.findMany({
-    where: { restaurantId },
+    where: { ...activeCategoryWhere, restaurantId },
     orderBy: { sortOrder: 'asc' },
   });
 }
 
 export async function findOneById(id: string, restaurantId?: string): Promise<Category | null> {
   return prisma.category.findFirst({
-    where: { id, ...(restaurantId ? { restaurantId } : {}) },
+    where: { ...activeCategoryWhere, id, ...(restaurantId ? { restaurantId } : {}) },
   });
 }
 
@@ -22,6 +26,7 @@ export async function create(
   return prisma.category.create({
     data: {
       ...data,
+      deletedAt: null,
       restaurant: { connect: { id: restaurantId } },
     },
   });
@@ -33,7 +38,7 @@ export async function update(
   data: Prisma.CategoryUpdateInput
 ): Promise<Category> {
   const category = await prisma.category.findFirst({
-    where: { id, restaurantId },
+    where: { ...activeCategoryWhere, id, restaurantId },
   });
 
   if (!category) {
@@ -50,7 +55,7 @@ export async function update(
 
 export async function softDelete(id: string, restaurantId: string): Promise<Category> {
   const category = await prisma.category.findFirst({
-    where: { id, restaurantId },
+    where: { ...activeCategoryWhere, id, restaurantId },
   });
 
   if (!category) {
