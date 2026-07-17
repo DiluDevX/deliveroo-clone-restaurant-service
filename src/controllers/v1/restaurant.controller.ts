@@ -12,6 +12,7 @@ import {
 } from '../../dtos/restaurant.dto';
 import { ForbiddenError, RestaurantNotFoundError } from '../../utils/errors';
 import { Prisma, RestaurantStatus } from '@prisma/client';
+import { assertCanManageRestaurantSettings } from '../../utils/actor-permissions';
 
 function stripCommission(
   restaurant: RestaurantResponseDTO & { commissionPercentage: number },
@@ -200,9 +201,7 @@ export const updateRestaurant = async (
     const { restaurantId } = req.params;
     const actor = req.actor;
 
-    if (!actor || (actor.type !== 'ADMIN' && actor.type !== 'RESTAURANT')) {
-      throw new ForbiddenError('Only ADMIN or RESTAURANT actors can update restaurants');
-    }
+    assertCanManageRestaurantSettings(actor);
 
     await restaurantService.assertRestaurantOwnership(restaurantId, actor);
 

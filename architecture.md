@@ -93,6 +93,11 @@ The BFF maps /api/restaurants to /v1/restaurants. Internal service routes use /v
 | PATCH  | /v1/restaurants/:restaurantId | Update restaurant             |
 | DELETE | /v1/restaurants/:restaurantId | Delete restaurant             |
 
+Restaurant updates are scoped to the authenticated restaurant assignment. Platform administrators
+may update any restaurant; restaurant `admin` and `super_admin` roles may update their assigned
+restaurant. `employee` and `finance` roles have read-only access to restaurant settings. The current
+model stores one standard opening and closing time, not a separate schedule for each weekday.
+
 ### List Query
 
 Supported query params:

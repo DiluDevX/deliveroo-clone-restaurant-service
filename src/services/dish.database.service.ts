@@ -2,6 +2,10 @@ import { Prisma, Dish } from '@prisma/client';
 import { prisma } from '../config/database';
 import { DishNotFoundError } from '../utils/errors';
 
+const activeDishWhere: Prisma.DishWhereInput = {
+  OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+};
+
 export async function findManyByRestaurant(
   restaurantId: string,
   filters: {
@@ -12,7 +16,7 @@ export async function findManyByRestaurant(
   }
 ): Promise<Dish[]> {
   const where: Prisma.DishWhereInput = {
-    deletedAt: null,
+    ...activeDishWhere,
     ...(restaurantId ? { restaurantId } : {}),
     ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
     ...(filters.isVegetarian !== undefined ? { isVegetarian: filters.isVegetarian } : {}),
@@ -29,8 +33,8 @@ export async function findManyByRestaurant(
 export async function findOneById(id: string, restaurantId?: string): Promise<Dish | null> {
   return prisma.dish.findFirst({
     where: {
+      ...activeDishWhere,
       id,
-      deletedAt: null,
       ...(restaurantId ? { restaurantId } : {}),
     },
   });
@@ -44,6 +48,7 @@ export async function create(
   return prisma.dish.create({
     data: {
       ...rest,
+      deletedAt: null,
       restaurant: { connect: { id: restaurantId } },
       category: { connect: { id: categoryId } },
     },
@@ -56,7 +61,7 @@ export async function update(
   data: Prisma.DishUpdateInput
 ): Promise<Dish> {
   const dish = await prisma.dish.findFirst({
-    where: { id, restaurantId, deletedAt: null },
+    where: { ...activeDishWhere, id, restaurantId },
   });
 
   if (!dish) {
@@ -71,7 +76,7 @@ export async function update(
 
 export async function softDelete(id: string, restaurantId: string): Promise<Dish> {
   const dish = await prisma.dish.findFirst({
-    where: { id, restaurantId, deletedAt: null },
+    where: { ...activeDishWhere, id, restaurantId },
   });
 
   if (!dish) {

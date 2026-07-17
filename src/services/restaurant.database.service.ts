@@ -156,14 +156,19 @@ export async function findOneById(
     where: { id },
     include: {
       categories: {
-        where: { deletedAt: null },
+        where: {
+          OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+        },
         orderBy: { sortOrder: 'asc' },
         select: {
           id: true,
           name: true,
           sortOrder: true,
           dishes: {
-            where: { deletedAt: null, ...(isAdmin ? {} : { isAvailable: true }) },
+            where: {
+              OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+              ...(isAdmin ? {} : { isAvailable: true }),
+            },
             orderBy: { sortOrder: 'asc' },
             select: {
               id: true,
