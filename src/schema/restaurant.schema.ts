@@ -1,19 +1,25 @@
 import { z } from 'zod';
 
-export const createRestaurantSchema = z.object({
-  orgId: z.string().min(1, 'orgId is required'),
-  name: z.string().min(1, 'Name is required').max(200, 'Name is too long').trim(),
-  image: z.string().url('Image must be a valid URL'),
-  address: z.string().max(500, 'Address is too long').trim().optional(),
-  description: z.string().max(1000, 'Description is too long').trim().optional(),
-  tags: z.array(z.string().trim()).default([]),
-  openingAt: z.string().min(1, 'Opening time is required'),
-  closingAt: z.string().min(1, 'Closing time is required'),
-  minimumValue: z.number().min(0, 'Minimum value must be non-negative'),
-  deliveryCharge: z.number().min(0, 'Delivery charge must be non-negative'),
-  commissionPercentage: z.number().min(0).max(100).default(15),
-  cuisine: z.string().trim().optional(),
-});
+export const createRestaurantSchema = z
+  .object({
+    orgId: z.string().trim().min(1, 'orgId is required'),
+    provisioningId: z.string().trim().uuid('provisioningId must be a valid UUID').optional(),
+    name: z.string().min(1, 'Name is required').max(200, 'Name is too long').trim(),
+    image: z.string().url('Image must be a valid URL'),
+    address: z.string().max(500, 'Address is too long').trim().optional(),
+    description: z.string().max(1000, 'Description is too long').trim().optional(),
+    tags: z.array(z.string().trim()).default([]),
+    openingAt: z.string().min(1, 'Opening time is required'),
+    closingAt: z.string().min(1, 'Closing time is required'),
+    minimumValue: z.number().min(0, 'Minimum value must be non-negative'),
+    deliveryCharge: z.number().min(0, 'Delivery charge must be non-negative'),
+    commissionPercentage: z.number().min(0).max(100).default(15),
+    cuisine: z.string().trim().optional(),
+  })
+  .refine((data) => !data.provisioningId || data.provisioningId === data.orgId, {
+    message: 'provisioningId must match orgId during platform provisioning',
+    path: ['provisioningId'],
+  });
 
 export const updateRestaurantSchema = z
   .object({
@@ -84,5 +90,9 @@ export const restaurantIdParamsSchema = z.object({
 });
 
 export const restaurantOrgIdParamsSchema = z.object({
-  orgId: z.string().uuid('orgId must be a valid UUID'),
+  orgId: z.string().trim().min(1, 'orgId is required'),
+});
+
+export const restaurantProvisioningIdParamsSchema = z.object({
+  provisioningId: z.string().uuid('provisioningId must be a valid UUID'),
 });

@@ -153,7 +153,10 @@ export async function findOneById(
   const isAdmin = actor?.type === 'ADMIN';
 
   return prisma.restaurant.findFirst({
-    where: { id },
+    where: {
+      id,
+      ...(isAdmin ? {} : { status: RestaurantStatus.ACTIVE }),
+    },
     include: {
       categories: {
         where: {
@@ -208,10 +211,47 @@ export async function findOneByOrgId(orgId: string): Promise<Restaurant | null> 
   });
 }
 
-export async function deleteProvisionedByOrgId(orgId: string): Promise<Restaurant> {
+export async function findOneByProvisioningId(provisioningId: string): Promise<Restaurant | null> {
+  return prisma.restaurant.findFirst({
+    where: { provisioningId, deletedAt: null },
+  });
+}
+
+export async function completeProvisioning(provisioningId: string): Promise<Restaurant> {
   return prisma.$transaction(async (transaction) => {
-    const restaurant = await transaction.restaurant.findUnique({
-      where: { orgId },
+    const restaurant = await transaction.restaurant.findFirst({
+      where: { provisioningId, deletedAt: null },
+    });
+
+    if (!restaurant) {
+      throw new RestaurantNotFoundError('Provisioned restaurant not found');
+    }
+    if (restaurant.provisioningStatus === 'COMPLETED') {
+      return restaurant;
+    }
+    if (restaurant.provisioningStatus !== 'PENDING') {
+      throw new ConflictError('Restaurant does not have an active provisioning operation');
+    }
+
+    return transaction.restaurant.update({
+      where: { id: restaurant.id },
+      data: {
+        provisioningStatus: 'COMPLETED',
+        provisioningCompletedAt: new Date(),
+        status: RestaurantStatus.ACTIVE,
+      },
+    });
+  });
+}
+
+export async function deleteProvisionedById(provisioningId: string): Promise<Restaurant> {
+  return prisma.$transaction(async (transaction) => {
+    const restaurant = await transaction.restaurant.findFirst({
+      where: {
+        provisioningId,
+        provisioningStatus: 'PENDING',
+        deletedAt: null,
+      },
       include: { _count: { select: { categories: true, dishes: true } } },
     });
 

@@ -3,6 +3,8 @@ import {
   listRestaurants,
   getRestaurant,
   getRestaurantByOrgId,
+  getRestaurantByProvisioningId,
+  completeRestaurantProvisioning,
   deleteProvisionedRestaurant,
   createRestaurant,
   updateRestaurant,
@@ -15,6 +17,7 @@ import {
   listRestaurantsQuerySchema,
   restaurantIdParamsSchema,
   restaurantOrgIdParamsSchema,
+  restaurantProvisioningIdParamsSchema,
 } from '../../schema/restaurant.schema';
 
 const router = Router();
@@ -23,9 +26,21 @@ router.get('/', validateQuery(listRestaurantsQuerySchema), listRestaurants);
 
 router.get('/by-org-id/:orgId', validateParams(restaurantOrgIdParamsSchema), getRestaurantByOrgId);
 
+router.get(
+  '/provisioning/:provisioningId',
+  validateParams(restaurantProvisioningIdParamsSchema),
+  getRestaurantByProvisioningId
+);
+
+router.patch(
+  '/provisioning/:provisioningId/complete',
+  validateParams(restaurantProvisioningIdParamsSchema),
+  completeRestaurantProvisioning
+);
+
 router.delete(
-  '/provisioning/:orgId',
-  validateParams(restaurantOrgIdParamsSchema),
+  '/provisioning/:provisioningId',
+  validateParams(restaurantProvisioningIdParamsSchema),
   deleteProvisionedRestaurant
 );
 

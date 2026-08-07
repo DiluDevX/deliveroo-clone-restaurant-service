@@ -12,6 +12,11 @@ enum RestaurantStatus {
   DISABLED
 }
 
+enum RestaurantProvisioningStatus {
+  PENDING
+  COMPLETED
+}
+
 enum DishTag {
   BESTSELLER
   NEW
@@ -19,21 +24,24 @@ enum DishTag {
 }
 
 model Restaurant {
-  id                   String           @id @default(auto()) @map("_id") @db.ObjectId
-  orgId                String           @unique
-  name                 String
-  image                String
-  address              String?
-  description          String?
-  tags                 String[]
-  openingAt            String
-  closingAt            String
-  minimumValue         Float
-  deliveryCharge       Float
-  commissionPercentage Float            @default(15)
-  cuisine              String?
-  rating               Float            @default(0)
-  status               RestaurantStatus @default(ACTIVE)
+  id                      String           @id @default(auto()) @map("_id") @db.ObjectId
+  orgId                   String           @unique
+  name                    String
+  image                   String
+  address                 String?
+  description             String?
+  tags                    String[]
+  openingAt               String
+  closingAt               String
+  minimumValue            Float
+  deliveryCharge          Float
+  commissionPercentage    Float            @default(15)
+  cuisine                 String?
+  rating                  Float            @default(0)
+  status                  RestaurantStatus @default(ACTIVE)
+  provisioningId          String?
+  provisioningStatus      RestaurantProvisioningStatus?
+  provisioningCompletedAt DateTime?
 
   categories           Category[]
   dishes               Dish[]
@@ -49,6 +57,7 @@ model Restaurant {
   @@index([minimumValue])
   @@index([name])
   @@index([createdAt])
+  @@index([provisioningId, provisioningStatus, deletedAt])
 }
 
 model Category {
