@@ -85,18 +85,25 @@ The BFF maps /api/restaurants to /v1/restaurants. Internal service routes use /v
 
 ## Restaurant Routes
 
-| Method | Path                          | Purpose                       |
-| ------ | ----------------------------- | ----------------------------- |
-| GET    | /v1/restaurants               | List restaurants with filters |
-| GET    | /v1/restaurants/:restaurantId | Get one restaurant            |
-| POST   | /v1/restaurants               | Create restaurant             |
-| PATCH  | /v1/restaurants/:restaurantId | Update restaurant             |
-| DELETE | /v1/restaurants/:restaurantId | Delete restaurant             |
+| Method | Path                                | Purpose                                             |
+| ------ | ----------------------------------- | --------------------------------------------------- |
+| GET    | /v1/restaurants                     | List restaurants with filters                       |
+| GET    | /v1/restaurants/by-org-id/:orgId    | Recover one restaurant during platform provisioning |
+| DELETE | /v1/restaurants/provisioning/:orgId | Compensate a newly rejected provisioning attempt    |
+| GET    | /v1/restaurants/:restaurantId       | Get one restaurant                                  |
+| POST   | /v1/restaurants                     | Create restaurant                                   |
+| PATCH  | /v1/restaurants/:restaurantId       | Update restaurant                                   |
+| DELETE | /v1/restaurants/:restaurantId       | Delete restaurant                                   |
 
 Restaurant updates are scoped to the authenticated restaurant assignment. Platform administrators
 may update any restaurant; restaurant `admin` and `super_admin` roles may update their assigned
 restaurant. `employee` and `finance` roles have read-only access to restaurant settings. The current
 model stores one standard opening and closing time, not a separate schedule for each weekday.
+
+The `by-org-id` recovery route is restricted to the internal `ADMIN` actor. It allows the BFF to retry
+a provisioning command using the same UUID without creating a duplicate restaurant. The provisioning
+delete is also internal-only and permanently removes only the restaurant the BFF just created after a
+definitive owner validation or conflict rejection; normal restaurant deletion remains a soft delete.
 
 ### List Query
 

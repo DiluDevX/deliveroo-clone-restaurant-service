@@ -202,6 +202,33 @@ export async function create(data: Prisma.RestaurantCreateInput): Promise<Restau
   }
 }
 
+export async function findOneByOrgId(orgId: string): Promise<Restaurant | null> {
+  return prisma.restaurant.findFirst({
+    where: { orgId, deletedAt: null },
+  });
+}
+
+export async function deleteProvisionedByOrgId(orgId: string): Promise<Restaurant> {
+  return prisma.$transaction(async (transaction) => {
+    const restaurant = await transaction.restaurant.findUnique({
+      where: { orgId },
+      include: { _count: { select: { categories: true, dishes: true } } },
+    });
+
+    if (!restaurant) {
+      throw new RestaurantNotFoundError('Provisioned restaurant not found');
+    }
+
+    if (restaurant._count.categories > 0 || restaurant._count.dishes > 0) {
+      throw new ConflictError(
+        'Provisioned restaurant is no longer empty and cannot be compensated'
+      );
+    }
+
+    return transaction.restaurant.delete({ where: { id: restaurant.id } });
+  });
+}
+
 export async function update(id: string, data: Prisma.RestaurantUpdateInput): Promise<Restaurant> {
   try {
     return await prisma.restaurant.update({

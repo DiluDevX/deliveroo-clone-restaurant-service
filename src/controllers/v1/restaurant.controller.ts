@@ -9,6 +9,7 @@ import {
   ListRestaurantsQueryDTO,
   RestaurantIdParamsDTO,
   RestaurantResponseDTO,
+  RestaurantOrgIdParamsDTO,
 } from '../../dtos/restaurant.dto';
 import { ForbiddenError, RestaurantNotFoundError } from '../../utils/errors';
 import { Prisma, RestaurantStatus } from '@prisma/client';
@@ -184,6 +185,54 @@ export const createRestaurant = async (
     });
   } catch (error) {
     logger.error(error, 'create restaurant error');
+    next(error);
+  }
+};
+
+export const getRestaurantByOrgId = async (
+  req: Request<RestaurantOrgIdParamsDTO>,
+  res: Response<CommonResponseDTO<RestaurantResponseDTO>>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (req.actor?.type !== 'ADMIN') {
+      throw new ForbiddenError('Only ADMIN actors can retrieve restaurants by orgId');
+    }
+
+    const restaurant = await restaurantService.findOneByOrgId(req.params.orgId);
+    if (!restaurant) {
+      throw new RestaurantNotFoundError('Restaurant not found');
+    }
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Restaurant retrieved successfully',
+      data: restaurant,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteProvisionedRestaurant = async (
+  req: Request<RestaurantOrgIdParamsDTO>,
+  res: Response<CommonResponseDTO<null>>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (req.actor?.type !== 'ADMIN') {
+      throw new ForbiddenError('Only ADMIN actors can compensate restaurant provisioning');
+    }
+
+    const restaurant = await restaurantService.deleteProvisionedByOrgId(req.params.orgId);
+    logger.warn({ id: restaurant.id, orgId: restaurant.orgId }, 'Provisioned restaurant removed');
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Provisioned restaurant removed successfully',
+      data: null,
+    });
+  } catch (error) {
     next(error);
   }
 };

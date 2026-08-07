@@ -2,6 +2,8 @@ import { Router } from 'express';
 import {
   listRestaurants,
   getRestaurant,
+  getRestaurantByOrgId,
+  deleteProvisionedRestaurant,
   createRestaurant,
   updateRestaurant,
   deleteRestaurant,
@@ -12,11 +14,20 @@ import {
   updateRestaurantSchema,
   listRestaurantsQuerySchema,
   restaurantIdParamsSchema,
+  restaurantOrgIdParamsSchema,
 } from '../../schema/restaurant.schema';
 
 const router = Router();
 
 router.get('/', validateQuery(listRestaurantsQuerySchema), listRestaurants);
+
+router.get('/by-org-id/:orgId', validateParams(restaurantOrgIdParamsSchema), getRestaurantByOrgId);
+
+router.delete(
+  '/provisioning/:orgId',
+  validateParams(restaurantOrgIdParamsSchema),
+  deleteProvisionedRestaurant
+);
 
 router.get('/:restaurantId', validateParams(restaurantIdParamsSchema), getRestaurant);
 

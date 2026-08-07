@@ -82,3 +82,7 @@ export const listRestaurantsQuerySchema = z
 export const restaurantIdParamsSchema = z.object({
   restaurantId: z.string().min(1, 'restaurantId is required'),
 });
+
+export const restaurantOrgIdParamsSchema = z.object({
+  orgId: z.string().uuid('orgId must be a valid UUID'),
+});

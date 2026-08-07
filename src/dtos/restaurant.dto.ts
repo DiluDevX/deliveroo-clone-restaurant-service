@@ -4,12 +4,14 @@ import {
   updateRestaurantSchema,
   listRestaurantsQuerySchema,
   restaurantIdParamsSchema,
+  restaurantOrgIdParamsSchema,
 } from '../schema/restaurant.schema';
 
 export type CreateRestaurantDTO = z.infer<typeof createRestaurantSchema>;
 export type UpdateRestaurantDTO = z.infer<typeof updateRestaurantSchema>;
 export type ListRestaurantsQueryDTO = z.infer<typeof listRestaurantsQuerySchema>;
 export type RestaurantIdParamsDTO = z.infer<typeof restaurantIdParamsSchema>;
+export type RestaurantOrgIdParamsDTO = z.infer<typeof restaurantOrgIdParamsSchema>;
 
 export interface RestaurantResponseDTO {
   id: string;
