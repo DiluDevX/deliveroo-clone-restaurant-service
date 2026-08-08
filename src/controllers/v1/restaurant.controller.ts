@@ -261,8 +261,8 @@ export const completeRestaurantProvisioning = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    if (req.actor?.type !== 'ADMIN') {
-      throw new ForbiddenError('Only ADMIN actors can complete restaurant provisioning');
+    if (req.actor?.type !== 'ADMIN' && req.actor?.type !== 'SYSTEM') {
+      throw new ForbiddenError('Only ADMIN or SYSTEM actors can complete restaurant provisioning');
     }
 
     const restaurant = await restaurantService.completeProvisioning(req.params.provisioningId);

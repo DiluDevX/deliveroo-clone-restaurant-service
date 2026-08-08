@@ -104,7 +104,9 @@ model stores one standard opening and closing time, not a separate schedule for 
 
 Provisioning routes are restricted to the internal `ADMIN` actor. A restaurant created by the BFF
 stores the stable provisioning UUID and starts in `PENDING`. The BFF marks it `COMPLETED` only after
-the owner transaction succeeds. Pending restaurants remain disabled and become active at completion.
+the owner accepts the invitation and the ownership transaction succeeds. Pending restaurants remain
+disabled and become active at completion. The completion route accepts trusted internal `ADMIN` and
+`SYSTEM` actors.
 Compensation can permanently remove only a matching, non-deleted,
 empty `PENDING` record with the same provisioning UUID; normal restaurant deletion remains a soft
 delete. Existing organization identifiers remain non-empty strings; provisioning identifiers use
