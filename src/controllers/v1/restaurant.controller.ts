@@ -9,9 +9,11 @@ import {
   ListRestaurantsQueryDTO,
   RestaurantIdParamsDTO,
   RestaurantResponseDTO,
+  RestaurantOrgIdParamsDTO,
+  RestaurantProvisioningIdParamsDTO,
 } from '../../dtos/restaurant.dto';
 import { ForbiddenError, RestaurantNotFoundError } from '../../utils/errors';
-import { Prisma, RestaurantStatus } from '@prisma/client';
+import { Prisma, RestaurantProvisioningStatus, RestaurantStatus } from '@prisma/client';
 import { assertCanManageRestaurantSettings } from '../../utils/actor-permissions';
 
 function stripCommission(
@@ -21,7 +23,13 @@ function stripCommission(
   if (isAdmin) {
     return restaurant;
   }
-  const { commissionPercentage: _commissionPercentage, ...rest } = restaurant;
+  const {
+    commissionPercentage: _commissionPercentage,
+    provisioningId: _provisioningId,
+    provisioningStatus: _provisioningStatus,
+    provisioningCompletedAt: _provisioningCompletedAt,
+    ...rest
+  } = restaurant;
   return rest;
 }
 
@@ -161,6 +169,10 @@ export const createRestaurant = async (
 
     const restaurant = await restaurantService.create({
       orgId: req.body.orgId,
+      provisioningId: req.body.provisioningId,
+      provisioningStatus: req.body.provisioningId
+        ? RestaurantProvisioningStatus.PENDING
+        : undefined,
       name: req.body.name,
       image: req.body.image,
       address: req.body.address,
@@ -172,7 +184,7 @@ export const createRestaurant = async (
       deliveryCharge: req.body.deliveryCharge,
       commissionPercentage: req.body.commissionPercentage,
       cuisine: req.body.cuisine,
-      status: RestaurantStatus.ACTIVE,
+      status: req.body.provisioningId ? RestaurantStatus.DISABLED : RestaurantStatus.ACTIVE,
     });
 
     logger.info({ id: restaurant.id }, 'restaurant created');
@@ -184,6 +196,121 @@ export const createRestaurant = async (
     });
   } catch (error) {
     logger.error(error, 'create restaurant error');
+    next(error);
+  }
+};
+
+export const getRestaurantByOrgId = async (
+  req: Request<RestaurantOrgIdParamsDTO>,
+  res: Response<CommonResponseDTO<RestaurantResponseDTO>>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (req.actor?.type !== 'ADMIN') {
+      throw new ForbiddenError('Only ADMIN actors can retrieve restaurants by orgId');
+    }
+
+    const restaurant = await restaurantService.findOneByOrgId(req.params.orgId);
+    if (!restaurant) {
+      throw new RestaurantNotFoundError('Restaurant not found');
+    }
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Restaurant retrieved successfully',
+      data: restaurant,
+    });
+  } catch (error) {
+    logger.error({ error, orgId: req.params.orgId }, 'get restaurant by orgId error');
+    next(error);
+  }
+};
+
+export const getRestaurantByProvisioningId = async (
+  req: Request<RestaurantProvisioningIdParamsDTO>,
+  res: Response<CommonResponseDTO<RestaurantResponseDTO>>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (req.actor?.type !== 'ADMIN') {
+      throw new ForbiddenError('Only ADMIN actors can retrieve provisioning records');
+    }
+
+    const restaurant = await restaurantService.findOneByProvisioningId(req.params.provisioningId);
+    if (!restaurant) {
+      throw new RestaurantNotFoundError('Provisioned restaurant not found');
+    }
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Provisioned restaurant retrieved successfully',
+      data: restaurant,
+    });
+  } catch (error) {
+    logger.error(
+      { error, provisioningId: req.params.provisioningId },
+      'get provisioned restaurant error'
+    );
+    next(error);
+  }
+};
+
+export const completeRestaurantProvisioning = async (
+  req: Request<RestaurantProvisioningIdParamsDTO>,
+  res: Response<CommonResponseDTO<RestaurantResponseDTO>>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (req.actor?.type !== 'ADMIN' && req.actor?.type !== 'SYSTEM') {
+      throw new ForbiddenError('Only ADMIN or SYSTEM actors can complete restaurant provisioning');
+    }
+
+    const restaurant = await restaurantService.completeProvisioning(req.params.provisioningId);
+    logger.info(
+      { id: restaurant.id, provisioningId: req.params.provisioningId },
+      'Restaurant provisioning completed'
+    );
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Restaurant provisioning completed successfully',
+      data: restaurant,
+    });
+  } catch (error) {
+    logger.error(
+      { error, provisioningId: req.params.provisioningId },
+      'complete restaurant provisioning error'
+    );
+    next(error);
+  }
+};
+
+export const deleteProvisionedRestaurant = async (
+  req: Request<RestaurantProvisioningIdParamsDTO>,
+  res: Response<CommonResponseDTO<null>>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (req.actor?.type !== 'ADMIN') {
+      throw new ForbiddenError('Only ADMIN actors can compensate restaurant provisioning');
+    }
+
+    const restaurant = await restaurantService.deleteProvisionedById(req.params.provisioningId);
+    logger.warn(
+      { id: restaurant.id, provisioningId: req.params.provisioningId },
+      'Provisioned restaurant removed'
+    );
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Provisioned restaurant removed successfully',
+      data: null,
+    });
+  } catch (error) {
+    logger.error(
+      { error, provisioningId: req.params.provisioningId },
+      'delete provisioned restaurant error'
+    );
     next(error);
   }
 };

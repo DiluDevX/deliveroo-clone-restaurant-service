@@ -1,14 +1,12 @@
 # [1.0.0-beta.9](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.8...v1.0.0-beta.9) (2026-07-17)
 
-
 ### Bug Fixes
 
-* trigger azure deployment ([6557e7b](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/6557e7bdbb18ada9b0e952ee61144acdc43db173))
-
+- trigger azure deployment ([6557e7b](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/6557e7bdbb18ada9b0e952ee61144acdc43db173))
 
 ### Features
 
-* implement restaurant management permissions ([2a08ac2](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/2a08ac2e631ec9f3eb3e99b6998055658086e37c))
+- implement restaurant management permissions ([2a08ac2](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/2a08ac2e631ec9f3eb3e99b6998055658086e37c))
 
 # [1.0.0-beta.8](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.7...v1.0.0-beta.8) (2026-07-16)
 

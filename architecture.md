@@ -85,18 +85,32 @@ The BFF maps /api/restaurants to /v1/restaurants. Internal service routes use /v
 
 ## Restaurant Routes
 
-| Method | Path                          | Purpose                       |
-| ------ | ----------------------------- | ----------------------------- |
-| GET    | /v1/restaurants               | List restaurants with filters |
-| GET    | /v1/restaurants/:restaurantId | Get one restaurant            |
-| POST   | /v1/restaurants               | Create restaurant             |
-| PATCH  | /v1/restaurants/:restaurantId | Update restaurant             |
-| DELETE | /v1/restaurants/:restaurantId | Delete restaurant             |
+| Method | Path                                                  | Purpose                                             |
+| ------ | ----------------------------------------------------- | --------------------------------------------------- |
+| GET    | /v1/restaurants                                       | List restaurants with filters                       |
+| GET    | /v1/restaurants/by-org-id/:orgId                      | Retrieve one restaurant by organization id          |
+| GET    | /v1/restaurants/provisioning/:provisioningId          | Recover a pending or completed provisioning attempt |
+| PATCH  | /v1/restaurants/provisioning/:provisioningId/complete | Complete a provisioning attempt                     |
+| DELETE | /v1/restaurants/provisioning/:provisioningId          | Compensate a pending provisioning attempt           |
+| GET    | /v1/restaurants/:restaurantId                         | Get one restaurant                                  |
+| POST   | /v1/restaurants                                       | Create restaurant                                   |
+| PATCH  | /v1/restaurants/:restaurantId                         | Update restaurant                                   |
+| DELETE | /v1/restaurants/:restaurantId                         | Delete restaurant                                   |
 
 Restaurant updates are scoped to the authenticated restaurant assignment. Platform administrators
 may update any restaurant; restaurant `admin` and `super_admin` roles may update their assigned
 restaurant. `employee` and `finance` roles have read-only access to restaurant settings. The current
 model stores one standard opening and closing time, not a separate schedule for each weekday.
+
+Provisioning routes are restricted to the internal `ADMIN` actor. A restaurant created by the BFF
+stores the stable provisioning UUID and starts in `PENDING`. The BFF marks it `COMPLETED` only after
+the owner accepts the invitation and the ownership transaction succeeds. Pending restaurants remain
+disabled and become active at completion. The completion route accepts trusted internal `ADMIN` and
+`SYSTEM` actors.
+Compensation can permanently remove only a matching, non-deleted,
+empty `PENDING` record with the same provisioning UUID; normal restaurant deletion remains a soft
+delete. Existing organization identifiers remain non-empty strings; provisioning identifiers use
+UUIDs and are validated separately.
 
 ### List Query
 

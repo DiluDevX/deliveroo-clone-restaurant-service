@@ -4,12 +4,18 @@ import {
   updateRestaurantSchema,
   listRestaurantsQuerySchema,
   restaurantIdParamsSchema,
+  restaurantOrgIdParamsSchema,
+  restaurantProvisioningIdParamsSchema,
 } from '../schema/restaurant.schema';
 
 export type CreateRestaurantDTO = z.infer<typeof createRestaurantSchema>;
 export type UpdateRestaurantDTO = z.infer<typeof updateRestaurantSchema>;
 export type ListRestaurantsQueryDTO = z.infer<typeof listRestaurantsQuerySchema>;
 export type RestaurantIdParamsDTO = z.infer<typeof restaurantIdParamsSchema>;
+export type RestaurantOrgIdParamsDTO = z.infer<typeof restaurantOrgIdParamsSchema>;
+export type RestaurantProvisioningIdParamsDTO = z.infer<
+  typeof restaurantProvisioningIdParamsSchema
+>;
 
 export interface RestaurantResponseDTO {
   id: string;
@@ -27,6 +33,9 @@ export interface RestaurantResponseDTO {
   cuisine: string | null;
   rating: number;
   status: string;
+  provisioningId?: string | null;
+  provisioningStatus?: string | null;
+  provisioningCompletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
