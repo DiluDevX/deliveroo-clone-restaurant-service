@@ -4,6 +4,10 @@ import { RestaurantNotFoundError, ConflictError, ForbiddenError } from '../utils
 import { PRISMA_CODE } from '../utils/constants';
 import { ActorContext } from '../types/express.d';
 
+const notSoftDeletedRestaurantFilter = {
+  OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+} satisfies Prisma.RestaurantWhereInput;
+
 export async function assertRestaurantOwnership(
   restaurantId: string,
   actor: ActorContext
@@ -14,7 +18,7 @@ export async function assertRestaurantOwnership(
 
   if (actor.type === 'RESTAURANT') {
     const restaurant = await prisma.restaurant.findFirst({
-      where: { id: restaurantId, deletedAt: null },
+      where: { id: restaurantId, ...notSoftDeletedRestaurantFilter },
       select: { id: true, orgId: true },
     });
 
@@ -66,6 +70,7 @@ export async function findMany(
   };
 
   const where: Prisma.RestaurantWhereInput = {
+    AND: [notSoftDeletedRestaurantFilter],
     ...(isAdmin && filters.status
       ? { status: filters.status }
       : !isAdmin
@@ -116,6 +121,7 @@ export async function count(
   const isAdmin = actor?.type === 'ADMIN';
 
   const where: Prisma.RestaurantWhereInput = {
+    AND: [notSoftDeletedRestaurantFilter],
     ...(isAdmin ? {} : { status: RestaurantStatus.ACTIVE }),
     ...(filters.cuisine ? { cuisine: filters.cuisine } : {}),
   };
@@ -155,6 +161,7 @@ export async function findOneById(
   return prisma.restaurant.findFirst({
     where: {
       id,
+      ...notSoftDeletedRestaurantFilter,
       ...(isAdmin ? {} : { status: RestaurantStatus.ACTIVE }),
     },
     include: {
@@ -207,20 +214,20 @@ export async function create(data: Prisma.RestaurantCreateInput): Promise<Restau
 
 export async function findOneByOrgId(orgId: string): Promise<Restaurant | null> {
   return prisma.restaurant.findFirst({
-    where: { orgId, deletedAt: null },
+    where: { orgId, ...notSoftDeletedRestaurantFilter },
   });
 }
 
 export async function findOneByProvisioningId(provisioningId: string): Promise<Restaurant | null> {
   return prisma.restaurant.findFirst({
-    where: { provisioningId, deletedAt: null },
+    where: { provisioningId, ...notSoftDeletedRestaurantFilter },
   });
 }
 
 export async function completeProvisioning(provisioningId: string): Promise<Restaurant> {
   return prisma.$transaction(async (transaction) => {
     const restaurant = await transaction.restaurant.findFirst({
-      where: { provisioningId, deletedAt: null },
+      where: { provisioningId, ...notSoftDeletedRestaurantFilter },
     });
 
     if (!restaurant) {
@@ -234,7 +241,7 @@ export async function completeProvisioning(provisioningId: string): Promise<Rest
     }
 
     return transaction.restaurant.update({
-      where: { id: restaurant.id },
+      where: { id: restaurant.id, ...notSoftDeletedRestaurantFilter },
       data: {
         provisioningStatus: 'COMPLETED',
         provisioningCompletedAt: new Date(),
@@ -250,7 +257,7 @@ export async function deleteProvisionedById(provisioningId: string): Promise<Res
       where: {
         provisioningId,
         provisioningStatus: 'PENDING',
-        deletedAt: null,
+        ...notSoftDeletedRestaurantFilter,
       },
       include: { _count: { select: { categories: true, dishes: true } } },
     });
@@ -265,14 +272,16 @@ export async function deleteProvisionedById(provisioningId: string): Promise<Res
       );
     }
 
-    return transaction.restaurant.delete({ where: { id: restaurant.id } });
+    return transaction.restaurant.delete({
+      where: { id: restaurant.id, ...notSoftDeletedRestaurantFilter },
+    });
   });
 }
 
 export async function update(id: string, data: Prisma.RestaurantUpdateInput): Promise<Restaurant> {
   try {
     return await prisma.restaurant.update({
-      where: { id },
+      where: { id, ...notSoftDeletedRestaurantFilter },
       data,
     });
   } catch (error) {
@@ -286,7 +295,7 @@ export async function update(id: string, data: Prisma.RestaurantUpdateInput): Pr
 export async function softDelete(id: string): Promise<Restaurant> {
   try {
     return await prisma.restaurant.update({
-      where: { id, deletedAt: null },
+      where: { id, ...notSoftDeletedRestaurantFilter },
       data: { deletedAt: new Date() },
     });
   } catch (error) {
