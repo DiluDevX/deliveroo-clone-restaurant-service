@@ -1,3 +1,13 @@
+# [1.0.0-beta.10](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.9...v1.0.0-beta.10) (2026-08-08)
+
+
+### Features
+
+* add restaurant retrieval and deletion by organization ID ([d126aa3](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/d126aa37e355e66ca65b693de234388bc9509362))
+* allow SYSTEM actors to complete restaurant provisioning ([8947b79](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/8947b7913e60b1146d8d2556a273ded6e24d7eee))
+* implement restaurant provisioning management and retrieval ([1f79fcd](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/1f79fcd983d361dadcde59199348475e622d8f2b))
+* implement soft delete filter for restaurant queries ([77fbc28](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/commit/77fbc287ed98cb842fd3a4c89f24cf01e72cc9d3))
+
 # [1.0.0-beta.9](https://github.com/DiluDevX/deliveroo-clone-restaurant-service/compare/v1.0.0-beta.8...v1.0.0-beta.9) (2026-07-17)
 
 ### Bug Fixes
