@@ -106,7 +106,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Deploy and verify on EC2 via SSH
-        uses: appleboy/ssh-action@1530429296e979861824d74fb800013190b5dee0
+        uses: appleboy/ssh-action@c4f70287fc37c43b14b30b407224bbbc8e8c6327
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         with:
